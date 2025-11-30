@@ -140,13 +140,10 @@ export default async function BerryDetail({ params }: { params: Promise<{ name: 
   try {
     berry = await PokeAPI.berry(name) as Berry;
     
-    // Try to fetch item info for description
-    if (berry.item?.url) {
+    // Try to fetch item info for description using the item name from berry
+    if (berry.item?.name) {
       try {
-        const res = await fetch(berry.item.url);
-        if (res.ok) {
-          berryItem = await res.json() as BerryItem;
-        }
+        berryItem = await PokeAPI.item(berry.item.name) as BerryItem;
       } catch {
         // Item info is optional
       }
