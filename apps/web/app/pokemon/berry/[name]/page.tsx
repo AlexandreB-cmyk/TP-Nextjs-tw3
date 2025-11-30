@@ -1,6 +1,7 @@
 import { PokeAPI } from "@workspace/pokeapi";
 import { Title } from "@/components/Title";
 import { Text } from "@/components/Text";
+import { BerryStats } from "@/components/BerryStats";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
@@ -66,15 +67,6 @@ const firmnessColors: Record<string, string> = {
   "hard": "bg-yellow-200",
   "very-hard": "bg-orange-200",
   "super-hard": "bg-red-200",
-};
-
-// Flavor translations
-const flavorTranslations: Record<string, string> = {
-  spicy: "Épicé",
-  dry: "Sec",
-  sweet: "Sucré",
-  bitter: "Amer",
-  sour: "Acide",
 };
 
 // Generate dynamic metadata for SEO
@@ -168,10 +160,6 @@ export default async function BerryDetail({ params }: { params: Promise<{ name: 
   const berryName = berry.name.charAt(0).toUpperCase() + berry.name.slice(1);
   const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${berry.name}-berry.png`;
 
-  // Sort flavors by potency
-  const sortedFlavors = [...berry.flavors].sort((a, b) => b.potency - a.potency);
-  const maxPotency = Math.max(...berry.flavors.map(f => f.potency), 1);
-
   return (
     <div className="container mx-auto py-10 px-4 max-w-4xl">
       <div className="mb-6">
@@ -261,36 +249,13 @@ export default async function BerryDetail({ params }: { params: Promise<{ name: 
               </Text>
             </div>
           )}
+
+          {/* Flavor Stats Chart */}
+          <div className="space-y-4">
+            <BerryStats flavors={berry.flavors} />
+          </div>
         </div>
       </div>
-
-      {/* Flavors */}
-      <Card className="p-6 mb-8">
-        <CardHeader className="p-0 pb-4">
-          <CardTitle>Saveurs</CardTitle>
-          <Text className="text-sm text-muted-foreground">Intensité des différentes saveurs de cette baie</Text>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="space-y-4">
-            {sortedFlavors.map((f) => (
-              <div key={f.flavor.name} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span className="capitalize font-medium">
-                    {flavorTranslations[f.flavor.name] || f.flavor.name}
-                  </span>
-                  <span className="text-muted-foreground">{f.potency}</span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div 
-                    className="h-full bg-primary rounded-full transition-all"
-                    style={{ width: `${(f.potency / maxPotency) * 100}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       {/* Additional Info */}
       <Card className="p-6">
