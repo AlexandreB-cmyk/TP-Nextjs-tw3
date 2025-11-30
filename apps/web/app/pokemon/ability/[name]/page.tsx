@@ -23,6 +23,9 @@ interface Ability {
   pokemon: { is_hidden: boolean; slot: number; pokemon: { name: string; url: string } }[];
 }
 
+// Maximum number of Pokemon to display per category
+const MAX_POKEMON_DISPLAY = 30;
+
 // Helper to get ID from URL
 function getIdFromUrl(url: string): string {
   return url.split('/').filter(Boolean).pop() || '';
@@ -239,7 +242,7 @@ export default async function AbilityDetail({ params }: { params: Promise<{ name
               <div>
                 <Text className="text-sm text-muted-foreground mb-3">Talent régulier</Text>
                 <div className="flex flex-wrap gap-3">
-                  {regularPokemon.slice(0, 30).map((p) => {
+                  {regularPokemon.slice(0, MAX_POKEMON_DISPLAY).map((p) => {
                     const pokemonId = getIdFromUrl(p.pokemon.url);
                     return (
                       <Link key={p.pokemon.name} href={`/pokemon/${p.pokemon.name}`}>
@@ -260,10 +263,10 @@ export default async function AbilityDetail({ params }: { params: Promise<{ name
                       </Link>
                     );
                   })}
-                  {regularPokemon.length > 30 && (
+                  {regularPokemon.length > MAX_POKEMON_DISPLAY && (
                     <div className="flex items-center justify-center p-4">
                       <Badge variant="secondary">
-                        +{regularPokemon.length - 30} autres
+                        +{regularPokemon.length - MAX_POKEMON_DISPLAY} autres
                       </Badge>
                     </div>
                   )}
@@ -276,7 +279,7 @@ export default async function AbilityDetail({ params }: { params: Promise<{ name
               <div>
                 <Text className="text-sm text-muted-foreground mb-3">Talent caché</Text>
                 <div className="flex flex-wrap gap-3">
-                  {hiddenPokemon.slice(0, 30).map((p) => {
+                  {hiddenPokemon.slice(0, MAX_POKEMON_DISPLAY).map((p) => {
                     const pokemonId = getIdFromUrl(p.pokemon.url);
                     return (
                       <Link key={p.pokemon.name} href={`/pokemon/${p.pokemon.name}`}>
@@ -298,10 +301,10 @@ export default async function AbilityDetail({ params }: { params: Promise<{ name
                       </Link>
                     );
                   })}
-                  {hiddenPokemon.length > 30 && (
+                  {hiddenPokemon.length > MAX_POKEMON_DISPLAY && (
                     <div className="flex items-center justify-center p-4">
                       <Badge variant="secondary">
-                        +{hiddenPokemon.length - 30} autres
+                        +{hiddenPokemon.length - MAX_POKEMON_DISPLAY} autres
                       </Badge>
                     </div>
                   )}
