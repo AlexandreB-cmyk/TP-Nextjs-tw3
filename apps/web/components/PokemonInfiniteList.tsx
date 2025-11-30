@@ -68,36 +68,54 @@ export function PokemonInfiniteList({
 
   // Fetch Pokemon basic info for types display
   const fetchPokemonDetails = useCallback(async (pokemon: PokemonListItem[]) => {
-    const newDetails = new Map(pokemonDetails);
-    
-    await Promise.all(
-      pokemon.map(async (p) => {
-        if (!newDetails.has(p.name)) {
+    setPokemonDetails(prevDetails => {
+      const newDetails = new Map(prevDetails);
+      
+      // Only fetch details for Pokemon we don't have yet
+      const toFetch = pokemon.filter(p => !newDetails.has(p.name));
+      
+      if (toFetch.length === 0) return prevDetails;
+      
+      // Fetch in background and update state when done
+      Promise.all(
+        toFetch.map(async (p) => {
           try {
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${p.name}`);
             if (res.ok) {
               const data = await res.json();
-              newDetails.set(p.name, {
-                id: data.id,
-                name: data.name,
-                types: data.types,
-                sprites: data.sprites,
-              });
+              return {
+                name: p.name,
+                details: {
+                  id: data.id,
+                  name: data.name,
+                  types: data.types,
+                  sprites: data.sprites,
+                } as PokemonBasicInfo
+              };
             }
           } catch {
             // Ignore errors for individual Pokemon
           }
-        }
-      })
-    );
-    
-    setPokemonDetails(newDetails);
-  }, [pokemonDetails]);
+          return null;
+        })
+      ).then(results => {
+        setPokemonDetails(prev => {
+          const updated = new Map(prev);
+          results.forEach(r => {
+            if (r) updated.set(r.name, r.details);
+          });
+          return updated;
+        });
+      });
+      
+      return prevDetails;
+    });
+  }, []);
 
   // Load initial Pokemon details
   useEffect(() => {
     fetchPokemonDetails(initialPokemon);
-  }, [initialPokemon]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [initialPokemon, fetchPokemonDetails]);
 
   // Load more Pokemon
   const loadMore = useCallback(async () => {

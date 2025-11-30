@@ -9,6 +9,23 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 // Type definitions for PokeAPI responses
+interface Pokemon {
+  id: number;
+  name: string;
+  height: number;
+  weight: number;
+  types: { type: { name: string } }[];
+  stats: { stat: { name: string }; base_stat: number }[];
+  abilities: { ability: { name: string }; is_hidden: boolean }[];
+  moves: { move: { name: string } }[];
+  game_indices: { version: { name: string } }[];
+  sprites: {
+    front_default: string;
+    front_shiny: string;
+    other: { 'official-artwork': { front_default: string; front_shiny: string } };
+  };
+}
+
 interface PokemonSpecies {
   flavor_text_entries: { flavor_text: string; language: { name: string }; version: { name: string } }[];
   genera: { genus: string; language: { name: string } }[];
@@ -59,12 +76,12 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
   const { name } = await params;
   
   // Fetch Pokemon data
-  let pokemon: Record<string, unknown>;
+  let pokemon: Pokemon;
   let species: PokemonSpecies | null = null;
   let evolutionChain: EvolutionChain | null = null;
   
   try {
-    pokemon = await PokeAPI.pokemon(name) as Record<string, unknown>;
+    pokemon = await PokeAPI.pokemon(name) as Pokemon;
     
     // Try to fetch species info
     try {
@@ -74,7 +91,7 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
       if (species?.evolution_chain?.url) {
         const res = await fetch(species.evolution_chain.url);
         if (res.ok) {
-          evolutionChain = await res.json();
+          evolutionChain = await res.json() as EvolutionChain;
         }
       }
     } catch {
@@ -124,20 +141,10 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
   const evolutions = evolutionChain ? flattenEvolutionChain(evolutionChain.chain) : [];
 
   // Get some notable moves (limit to 12)
-  const moves = ((pokemon.moves as { move: { name: string } }[]) || []).slice(0, 12);
+  const moves = pokemon.moves.slice(0, 12);
 
   // Get game versions where this Pokemon appears
-  const gameIndices = (pokemon.game_indices as { version: { name: string } }[]) || [];
-
-  const sprites = pokemon.sprites as {
-    front_default: string;
-    front_shiny: string;
-    other: { 'official-artwork': { front_default: string; front_shiny: string } };
-  };
-
-  const types = pokemon.types as { type: { name: string } }[];
-  const stats = pokemon.stats as { stat: { name: string }; base_stat: number }[];
-  const abilities = pokemon.abilities as { ability: { name: string }; is_hidden: boolean }[];
+  const gameIndices = pokemon.game_indices;
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-6xl">
@@ -154,8 +161,8 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
           <Card className="overflow-hidden border-2">
             <div className="bg-muted/30 p-8 flex justify-center items-center aspect-square relative">
               <Image 
-                src={sprites.other['official-artwork'].front_default || sprites.front_default} 
-                alt={pokemon.name as string}
+                src={pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default} 
+                alt={pokemon.name}
                 fill
                 className="object-contain p-4 drop-shadow-xl"
                 priority
@@ -164,7 +171,7 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
           </Card>
           
           <div className="flex gap-2 justify-center">
-            {types.map((t) => (
+            {pokemon.types.map((t) => (
               <Badge 
                 key={t.type.name} 
                 className={`text-white px-4 py-1 text-base capitalize ${typeColors[t.type.name] || 'bg-gray-500'}`}
@@ -175,22 +182,22 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
           </div>
 
           {/* Shiny variant */}
-          {sprites.front_shiny && (
+          {pokemon.sprites.front_shiny && (
             <Card className="p-4">
               <CardTitle className="text-sm text-center mb-3 text-muted-foreground">Variante Chromatique (Shiny)</CardTitle>
               <div className="flex justify-center gap-4">
                 <div className="relative w-24 h-24">
                   <Image 
-                    src={sprites.front_shiny}
+                    src={pokemon.sprites.front_shiny}
                     alt={`${pokemon.name} shiny`}
                     fill
                     className="object-contain"
                   />
                 </div>
-                {sprites.other['official-artwork'].front_shiny && (
+                {pokemon.sprites.other['official-artwork'].front_shiny && (
                   <div className="relative w-24 h-24">
                     <Image 
-                      src={sprites.other['official-artwork'].front_shiny}
+                      src={pokemon.sprites.other['official-artwork'].front_shiny}
                       alt={`${pokemon.name} shiny artwork`}
                       fill
                       className="object-contain"
@@ -206,7 +213,7 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
         <div className="space-y-8">
           <div>
             <div className="flex items-baseline gap-4 flex-wrap">
-              <Title level="h1" className="capitalize mb-2">{pokemon.name as string}</Title>
+              <Title level="h1" className="capitalize mb-2">{pokemon.name}</Title>
               <span className="text-2xl text-muted-foreground font-mono">#{String(pokemon.id).padStart(3, '0')}</span>
               {species?.is_legendary && (
                 <Badge className="bg-amber-500 text-white">Légendaire</Badge>
@@ -222,11 +229,11 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
             <div className="flex gap-8 mt-4 text-sm flex-wrap">
               <div className="flex flex-col">
                 <span className="text-muted-foreground">Taille</span>
-                <span className="font-medium text-lg">{(pokemon.height as number) / 10} m</span>
+                <span className="font-medium text-lg">{pokemon.height / 10} m</span>
               </div>
               <div className="flex flex-col">
                 <span className="text-muted-foreground">Poids</span>
-                <span className="font-medium text-lg">{(pokemon.weight as number) / 10} kg</span>
+                <span className="font-medium text-lg">{pokemon.weight / 10} kg</span>
               </div>
               {species?.habitat && (
                 <div className="flex flex-col">
@@ -257,7 +264,7 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
           <div className="space-y-4">
             <Title level="h3">Statistiques</Title>
             <div className="space-y-3">
-              {stats.map((s) => (
+              {pokemon.stats.map((s) => (
                 <div key={s.stat.name} className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="capitalize font-medium text-muted-foreground">{s.stat.name.replace('-', ' ')}</span>
@@ -278,7 +285,7 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
           <div className="space-y-4">
             <Title level="h3">Talents (Abilities)</Title>
             <div className="flex flex-wrap gap-2">
-              {abilities.map((a) => (
+              {pokemon.abilities.map((a) => (
                 <Badge key={a.ability.name} variant="secondary" className="capitalize">
                   {a.ability.name.replace('-', ' ')}
                   {a.is_hidden && <span className="ml-1 text-xs opacity-50">(Caché)</span>}
