@@ -12,6 +12,7 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import { Select } from "@workspace/ui/components/select";
 import { useRouter } from "next/navigation";
+import { generations, formatGeneration } from "@/lib/pokemon-constants";
 
 type AbilityListItem = {
   name: string;
@@ -30,19 +31,6 @@ type AbilityBasicInfo = {
 function getIdFromUrl(url: string): string {
   return url.split('/').filter(Boolean).pop() || '';
 }
-
-// Available generations
-const generations = [
-  'generation-i',
-  'generation-ii',
-  'generation-iii',
-  'generation-iv',
-  'generation-v',
-  'generation-vi',
-  'generation-vii',
-  'generation-viii',
-  'generation-ix',
-];
 
 interface AbilityInfiniteListProps {
   initialAbilities: AbilityListItem[];
@@ -207,7 +195,7 @@ export function AbilityInfiniteList({
             <option value="">Toutes les générations</option>
             {generations.map((gen) => (
               <option key={gen} value={gen}>
-                {gen.replace(/-/g, ' ').replace('generation', 'Génération')}
+                {formatGeneration(gen)}
               </option>
             ))}
           </Select>

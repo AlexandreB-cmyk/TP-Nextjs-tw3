@@ -12,6 +12,7 @@ import {
 import { Badge } from "@workspace/ui/components/badge";
 import { Select } from "@workspace/ui/components/select";
 import { useRouter } from "next/navigation";
+import { typeColors, pokemonTypes, damageClassColors, damageClasses, formatName } from "@/lib/pokemon-constants";
 
 type MoveListItem = {
   name: string;
@@ -32,44 +33,6 @@ type MoveBasicInfo = {
 function getIdFromUrl(url: string): string {
   return url.split('/').filter(Boolean).pop() || '';
 }
-
-// Type colors map
-const typeColors: Record<string, string> = {
-  fire: "bg-red-500",
-  water: "bg-blue-500",
-  grass: "bg-green-500",
-  electric: "bg-yellow-500",
-  psychic: "bg-pink-500",
-  ice: "bg-cyan-500",
-  dragon: "bg-indigo-500",
-  dark: "bg-slate-800",
-  fairy: "bg-rose-400",
-  normal: "bg-gray-400",
-  fighting: "bg-orange-700",
-  flying: "bg-sky-400",
-  poison: "bg-purple-500",
-  ground: "bg-amber-600",
-  rock: "bg-stone-500",
-  bug: "bg-lime-500",
-  ghost: "bg-violet-700",
-  steel: "bg-slate-400",
-};
-
-// Damage class colors
-const damageClassColors: Record<string, string> = {
-  physical: "bg-orange-500",
-  special: "bg-blue-500",
-  status: "bg-gray-500",
-};
-
-// Available Pokemon types
-const pokemonTypes = [
-  'fire', 'water', 'grass', 'electric', 'psychic', 'ice', 'dragon', 'dark',
-  'fairy', 'normal', 'fighting', 'flying', 'poison', 'ground', 'rock', 'bug', 'ghost', 'steel'
-];
-
-// Available damage classes
-const damageClasses = ['physical', 'special', 'status'];
 
 interface MoveInfiniteListProps {
   initialMoves: MoveListItem[];
@@ -233,7 +196,7 @@ export function MoveInfiniteList({
             <option value="">Tous les types</option>
             {pokemonTypes.map((type) => (
               <option key={type} value={type}>
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {formatName(type)}
               </option>
             ))}
           </Select>
@@ -248,7 +211,7 @@ export function MoveInfiniteList({
             <option value="">Toutes</option>
             {damageClasses.map((dc) => (
               <option key={dc} value={dc}>
-                {dc.charAt(0).toUpperCase() + dc.slice(1)}
+                {formatName(dc)}
               </option>
             ))}
           </Select>

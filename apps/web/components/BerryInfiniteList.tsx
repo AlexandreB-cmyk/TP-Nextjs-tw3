@@ -13,6 +13,7 @@ import { Badge } from "@workspace/ui/components/badge";
 import { Select } from "@workspace/ui/components/select";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { typeColors, pokemonTypes, firmnessLevels, formatName } from "@/lib/pokemon-constants";
 
 type BerryListItem = {
   name: string;
@@ -31,39 +32,6 @@ type BerryBasicInfo = {
 function getIdFromUrl(url: string): string {
   return url.split('/').filter(Boolean).pop() || '';
 }
-
-// Type colors map
-const typeColors: Record<string, string> = {
-  fire: "bg-red-500",
-  water: "bg-blue-500",
-  grass: "bg-green-500",
-  electric: "bg-yellow-500",
-  psychic: "bg-pink-500",
-  ice: "bg-cyan-500",
-  dragon: "bg-indigo-500",
-  dark: "bg-slate-800",
-  fairy: "bg-rose-400",
-  normal: "bg-gray-400",
-  fighting: "bg-orange-700",
-  flying: "bg-sky-400",
-  poison: "bg-purple-500",
-  ground: "bg-amber-600",
-  rock: "bg-stone-500",
-  bug: "bg-lime-500",
-  ghost: "bg-violet-700",
-  steel: "bg-slate-400",
-};
-
-// Available Pokemon types for berry natural gift
-const pokemonTypes = [
-  'fire', 'water', 'grass', 'electric', 'psychic', 'ice', 'dragon', 'dark',
-  'fairy', 'normal', 'fighting', 'flying', 'poison', 'ground', 'rock', 'bug', 'ghost', 'steel'
-];
-
-// Available firmness levels
-const firmnessLevels = [
-  'very-soft', 'soft', 'hard', 'very-hard', 'super-hard'
-];
 
 interface BerryInfiniteListProps {
   initialBerries: BerryListItem[];
@@ -225,7 +193,7 @@ export function BerryInfiniteList({
             <option value="">Tous les types</option>
             {pokemonTypes.map((type) => (
               <option key={type} value={type}>
-                {type.charAt(0).toUpperCase() + type.slice(1)}
+                {formatName(type)}
               </option>
             ))}
           </Select>
@@ -240,7 +208,7 @@ export function BerryInfiniteList({
             <option value="">Toutes</option>
             {firmnessLevels.map((firmness) => (
               <option key={firmness} value={firmness}>
-                {firmness.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                {formatName(firmness)}
               </option>
             ))}
           </Select>
