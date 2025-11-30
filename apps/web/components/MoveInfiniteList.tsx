@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -10,7 +10,9 @@ import {
   TableRow 
 } from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
+import { Select } from "@workspace/ui/components/select";
 import { useRouter } from "next/navigation";
+import { typeColors, pokemonTypes, damageClassColors, damageClasses, formatName } from "@/lib/pokemon-constants";
 
 type MoveListItem = {
   name: string;
@@ -32,35 +34,6 @@ function getIdFromUrl(url: string): string {
   return url.split('/').filter(Boolean).pop() || '';
 }
 
-// Type colors map
-const typeColors: Record<string, string> = {
-  fire: "bg-red-500",
-  water: "bg-blue-500",
-  grass: "bg-green-500",
-  electric: "bg-yellow-500",
-  psychic: "bg-pink-500",
-  ice: "bg-cyan-500",
-  dragon: "bg-indigo-500",
-  dark: "bg-slate-800",
-  fairy: "bg-rose-400",
-  normal: "bg-gray-400",
-  fighting: "bg-orange-700",
-  flying: "bg-sky-400",
-  poison: "bg-purple-500",
-  ground: "bg-amber-600",
-  rock: "bg-stone-500",
-  bug: "bg-lime-500",
-  ghost: "bg-violet-700",
-  steel: "bg-slate-400",
-};
-
-// Damage class colors
-const damageClassColors: Record<string, string> = {
-  physical: "bg-orange-500",
-  special: "bg-blue-500",
-  status: "bg-gray-500",
-};
-
 interface MoveInfiniteListProps {
   initialMoves: MoveListItem[];
   initialOffset: number;
@@ -78,6 +51,10 @@ export function MoveInfiniteList({
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  
+  // Filter states
+  const [typeFilter, setTypeFilter] = useState<string>('');
+  const [damageClassFilter, setDamageClassFilter] = useState<string>('');
 
   // Fetch Move basic info
   const fetchMoveDetails = useCallback(async (moves: MoveListItem[]) => {
@@ -183,8 +160,84 @@ export function MoveInfiniteList({
     };
   }, [hasMore, loading, loadMore]);
 
+  // Filter moves based on selected filters
+  const filteredMoves = useMemo(() => {
+    return moveList.filter((m) => {
+      const details = moveDetails.get(m.name);
+      
+      // If details not loaded yet, show the move (will be filtered when details load)
+      if (!details) return true;
+      
+      // Filter by type
+      if (typeFilter && details.type?.name !== typeFilter) {
+        return false;
+      }
+      
+      // Filter by damage class
+      if (damageClassFilter && details.damage_class?.name !== damageClassFilter) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [moveList, moveDetails, typeFilter, damageClassFilter]);
+
   return (
     <div className="space-y-4">
+      {/* Filters */}
+      <div className="flex flex-wrap gap-4 p-4 bg-muted/30 rounded-lg">
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-muted-foreground">Type</label>
+          <Select 
+            value={typeFilter} 
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="w-40"
+          >
+            <option value="">Tous les types</option>
+            {pokemonTypes.map((type) => (
+              <option key={type} value={type}>
+                {formatName(type)}
+              </option>
+            ))}
+          </Select>
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-sm text-muted-foreground">Catégorie</label>
+          <Select 
+            value={damageClassFilter} 
+            onChange={(e) => setDamageClassFilter(e.target.value)}
+            className="w-40"
+          >
+            <option value="">Toutes</option>
+            {damageClasses.map((dc) => (
+              <option key={dc} value={dc}>
+                {formatName(dc)}
+              </option>
+            ))}
+          </Select>
+        </div>
+        {(typeFilter || damageClassFilter) && (
+          <div className="flex items-end">
+            <button
+              onClick={() => {
+                setTypeFilter('');
+                setDamageClassFilter('');
+              }}
+              className="text-sm text-primary hover:underline"
+            >
+              Réinitialiser les filtres
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Results count */}
+      {(typeFilter || damageClassFilter) && (
+        <div className="text-sm text-muted-foreground">
+          {filteredMoves.length} capacité(s) trouvée(s)
+        </div>
+      )}
+
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -199,7 +252,7 @@ export function MoveInfiniteList({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {moveList.map((m) => {
+            {filteredMoves.map((m) => {
               const id = getIdFromUrl(m.url);
               const details = moveDetails.get(m.name);
               
