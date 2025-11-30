@@ -1,10 +1,17 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/card";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@workspace/ui/components/table";
 import { Badge } from "@workspace/ui/components/badge";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type BerryListItem = {
   name: string;
@@ -62,6 +69,7 @@ export function BerryInfiniteList({
   const [hasMore, setHasMore] = useState(initialBerries.length === 20);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   // Fetch Berry basic info
   const fetchBerryDetails = useCallback(async (berries: BerryListItem[]) => {
@@ -166,64 +174,84 @@ export function BerryInfiniteList({
   }, [hasMore, loading, loadMore]);
 
   return (
-    <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {berryList.map((b) => {
-          const id = getIdFromUrl(b.url);
-          const details = berryDetails.get(b.name);
-          // Berry sprites are available via item sprites
-          const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${b.name}-berry.png`;
-          
-          return (
-            <Link href={`/pokemon/berry/${b.name}`} key={b.name} className="group">
-              <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden border-muted">
-                <CardHeader className="p-4 bg-muted/20 group-hover:bg-muted/40 transition-colors">
-                  <div className="relative w-full aspect-square flex items-center justify-center">
-                    <Image 
-                      src={imageUrl} 
-                      alt={b.name}
-                      width={96}
-                      height={96}
-                      className="object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
-                    />
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 text-center space-y-2">
-                  <span className="text-xs font-mono text-muted-foreground">#{id.padStart(3, '0')}</span>
-                  <CardTitle className="capitalize text-lg">{b.name}</CardTitle>
-                  {details && (
-                    <div className="flex flex-wrap gap-1 justify-center">
-                      {details.natural_gift_type && (
-                        <Badge 
-                          className={`text-white text-xs capitalize ${typeColors[details.natural_gift_type.name] || 'bg-gray-500'}`}
-                        >
-                          {details.natural_gift_type.name}
-                        </Badge>
-                      )}
-                      <Badge variant="outline" className="text-xs capitalize">
-                        {details.firmness.name}
-                      </Badge>
+    <div className="space-y-4">
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[48px] text-center">Img</TableHead>
+              <TableHead className="w-[60px]">ID</TableHead>
+              <TableHead>Nom</TableHead>
+              <TableHead>Type (Cadeau)</TableHead>
+              <TableHead>Fermeté</TableHead>
+              <TableHead className="text-right">Taille</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {berryList.map((b) => {
+              const id = getIdFromUrl(b.url);
+              const details = berryDetails.get(b.name);
+              const imageUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/${b.name}.png`;
+              
+              return (
+                <TableRow 
+                  key={b.name} 
+                  className="cursor-pointer hover:bg-muted/50 h-[40px]"
+                  onClick={() => router.push(`/pokemon/berry/${b.name}`)}
+                >
+                  <TableCell className="p-1 text-center">
+                    <div className="flex items-center justify-center">
+                      <Image 
+                        src={imageUrl} 
+                        alt={b.name}
+                        width={32}
+                        height={32}
+                        className="object-contain"
+                        style={{ imageRendering: 'pixelated' }}
+                        unoptimized
+                      />
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </Link>
-          );
-        })}
+                  </TableCell>
+                  <TableCell className="font-mono text-muted-foreground">
+                    #{id.padStart(3, '0')}
+                  </TableCell>
+                  <TableCell className="font-medium capitalize">
+                    {b.name}
+                  </TableCell>
+                  <TableCell>
+                    {details?.natural_gift_type && (
+                      <Badge 
+                        className={`text-white text-xs capitalize ${typeColors[details.natural_gift_type.name] || 'bg-gray-500'}`}
+                      >
+                        {details.natural_gift_type.name}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="capitalize text-muted-foreground">
+                    {details?.firmness.name.replace('-', ' ')}
+                  </TableCell>
+                  <TableCell className="text-right">
+                    {details ? `${details.size / 10} cm` : '-'}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
       </div>
 
       {/* Infinite scroll trigger */}
-      <div ref={loadMoreRef} className="py-8 flex justify-center">
+      <div ref={loadMoreRef} className="py-4 flex justify-center">
         {loading && (
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
+          <div className="flex items-center gap-2 text-muted-foreground text-sm">
+            <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
             <span>Chargement...</span>
           </div>
         )}
         {!hasMore && berryList.length > 0 && (
-          <span className="text-muted-foreground">Toutes les baies ont été chargées !</span>
+          <span className="text-muted-foreground text-sm">Toutes les baies ont été chargées !</span>
         )}
       </div>
-    </>
+    </div>
   );
 }

@@ -59,7 +59,7 @@ function getIdFromUrl(url: string): string {
 // Flatten evolution chain
 function flattenEvolutionChain(chain: EvolutionLink): { name: string; id: string; level: number | null; trigger: string }[] {
   const result: { name: string; id: string; level: number | null; trigger: string }[] = [];
-  
+
   function traverse(link: EvolutionLink) {
     result.push({
       name: link.species.name,
@@ -69,25 +69,25 @@ function flattenEvolutionChain(chain: EvolutionLink): { name: string; id: string
     });
     link.evolves_to.forEach(traverse);
   }
-  
+
   traverse(chain);
   return result;
 }
 
 // Generate dynamic metadata for SEO
-export async function generateMetadata({ 
-  params 
-}: { 
-  params: Promise<{ name: string }> 
+export async function generateMetadata({
+  params
+}: {
+  params: Promise<{ name: string }>
 }): Promise<Metadata> {
   const { name } = await params;
-  
+
   try {
     const pokemon = await PokeAPI.pokemon(name) as Pokemon;
-    
+
     // Try to get species info for description
     let description = `Découvrez ${pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1)}, un Pokémon de type ${pokemon.types.map(t => t.type.name).join('/')}. Taille: ${pokemon.height / 10}m, Poids: ${pokemon.weight / 10}kg.`;
-    
+
     try {
       const species = await PokeAPI.species(name) as PokemonSpecies;
       const frenchEntry = species?.flavor_text_entries?.find(
@@ -96,17 +96,17 @@ export async function generateMetadata({
       const englishEntry = species?.flavor_text_entries?.find(
         (e) => e.language.name === 'en'
       )?.flavor_text;
-      
+
       if (frenchEntry || englishEntry) {
         description = (frenchEntry || englishEntry || '').replace(/\f/g, ' ').replace(/\n/g, ' ');
       }
     } catch {
       // Species info is optional
     }
-    
+
     const pokemonName = pokemon.name.charAt(0).toUpperCase() + pokemon.name.slice(1);
     const imageUrl = pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default;
-    
+
     return {
       title: `${pokemonName} #${String(pokemon.id).padStart(3, '0')} | Pokédex`,
       description,
@@ -147,19 +147,19 @@ export async function generateMetadata({
 
 export default async function PokemonDetail({ params }: { params: Promise<{ name: string }> }) {
   const { name } = await params;
-  
+
   // Fetch Pokemon data
   let pokemon: Pokemon;
   let species: PokemonSpecies | null = null;
   let evolutionChain: EvolutionChain | null = null;
-  
+
   try {
     pokemon = await PokeAPI.pokemon(name) as Pokemon;
-    
+
     // Try to fetch species info
     try {
       species = await PokeAPI.species(name) as PokemonSpecies;
-      
+
       // Try to fetch evolution chain
       if (species?.evolution_chain?.url) {
         const res = await fetch(species.evolution_chain.url);
@@ -233,8 +233,8 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
         <div className="space-y-6">
           <Card className="overflow-hidden border-2">
             <div className="bg-muted/30 p-8 flex justify-center items-center aspect-square relative">
-              <Image 
-                src={pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default} 
+              <Image
+                src={pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default}
                 alt={pokemon.name}
                 fill
                 className="object-contain p-4 drop-shadow-xl"
@@ -242,11 +242,11 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
               />
             </div>
           </Card>
-          
+
           <div className="flex gap-2 justify-center">
             {pokemon.types.map((t) => (
-              <Badge 
-                key={t.type.name} 
+              <Badge
+                key={t.type.name}
                 className={`text-white px-4 py-1 text-base capitalize ${typeColors[t.type.name] || 'bg-gray-500'}`}
               >
                 {t.type.name}
@@ -260,16 +260,18 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
               <CardTitle className="text-sm text-center mb-3 text-muted-foreground">Variante Chromatique (Shiny)</CardTitle>
               <div className="flex justify-center gap-4">
                 <div className="relative w-24 h-24">
-                  <Image 
+                  <Image
                     src={pokemon.sprites.front_shiny}
                     alt={`${pokemon.name} shiny`}
                     fill
                     className="object-contain"
+                    style={{ imageRendering: 'pixelated' }}
+
                   />
                 </div>
                 {pokemon.sprites.other['official-artwork'].front_shiny && (
                   <div className="relative w-24 h-24">
-                    <Image 
+                    <Image
                       src={pokemon.sprites.other['official-artwork'].front_shiny}
                       alt={`${pokemon.name} shiny artwork`}
                       fill
@@ -298,7 +300,7 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
             {genus && (
               <Text className="text-muted-foreground italic">{genus}</Text>
             )}
-            
+
             <div className="flex gap-8 mt-4 text-sm flex-wrap">
               <div className="flex flex-col">
                 <span className="text-muted-foreground">Taille</span>
@@ -371,6 +373,7 @@ export default async function PokemonDetail({ params }: { params: Promise<{ name
                           alt={evo.name}
                           fill
                           className="object-contain group-hover:scale-110 transition-transform"
+                          style={{ imageRendering: 'pixelated' }}
                         />
                       </div>
                       <span className={`capitalize text-sm font-medium ${evo.name === name ? 'text-primary' : ''}`}>

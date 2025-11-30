@@ -89,8 +89,6 @@ const StructureItem: React.FC<{ item: ProjectItem; depth: number }> = ({ item, d
             <div
                 className={cn(
                     "flex items-center space-x-2 py-0.5 pl-2",
-                    // Ajuste la marge gauche en fonction de la profondeur pour l'indentation
-                    depth > 0 && `ml-${depth * 4}`,
                     isFolder ? 'font-semibold text-gray-800 dark:text-gray-200' : 'text-gray-600 dark:text-gray-400'
                 )}
             >

@@ -158,7 +158,7 @@ export default async function BerryDetail({ params }: { params: Promise<{ name: 
   )?.text || null;
 
   const berryName = berry.name.charAt(0).toUpperCase() + berry.name.slice(1);
-  const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${berry.name}-berry.png`;
+  const imageUrl = `https://raw.githubusercontent.com/msikma/pokesprite/master/items/berry/${berry.name}.png`;
 
   return (
     <div className="container mx-auto py-10 px-4 max-w-4xl">
@@ -180,6 +180,8 @@ export default async function BerryDetail({ params }: { params: Promise<{ name: 
                 width={192}
                 height={192}
                 className="object-contain drop-shadow-xl"
+                style={{ imageRendering: 'pixelated' }}
+                unoptimized
                 priority
               />
             </div>

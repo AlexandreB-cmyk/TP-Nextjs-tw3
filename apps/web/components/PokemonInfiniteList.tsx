@@ -53,10 +53,10 @@ interface PokemonInfiniteListProps {
   searchQuery?: string;
 }
 
-export function PokemonInfiniteList({ 
-  initialPokemon, 
+export function PokemonInfiniteList({
+  initialPokemon,
   initialOffset,
-  searchQuery 
+  searchQuery
 }: PokemonInfiniteListProps) {
   const [pokemonList, setPokemonList] = useState<PokemonListItem[]>(initialPokemon);
   const [pokemonDetails, setPokemonDetails] = useState<Map<string, PokemonBasicInfo>>(new Map());
@@ -70,12 +70,12 @@ export function PokemonInfiniteList({
   const fetchPokemonDetails = useCallback(async (pokemon: PokemonListItem[]) => {
     setPokemonDetails(prevDetails => {
       const newDetails = new Map(prevDetails);
-      
+
       // Only fetch details for Pokemon we don't have yet
       const toFetch = pokemon.filter(p => !newDetails.has(p.name));
-      
+
       if (toFetch.length === 0) return prevDetails;
-      
+
       // Fetch in background and update state when done
       Promise.all(
         toFetch.map(async (p) => {
@@ -107,7 +107,7 @@ export function PokemonInfiniteList({
           return updated;
         });
       });
-      
+
       return prevDetails;
     });
   }, []);
@@ -120,12 +120,12 @@ export function PokemonInfiniteList({
   // Load more Pokemon
   const loadMore = useCallback(async () => {
     if (loading || !hasMore || searchQuery) return;
-    
+
     setLoading(true);
     try {
       const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=20&offset=${offset}`);
       const data = await res.json();
-      
+
       if (data.results.length === 0) {
         setHasMore(false);
       } else {
@@ -173,15 +173,15 @@ export function PokemonInfiniteList({
         {pokemonList.map((p) => {
           const id = getIdFromUrl(p.url);
           const details = pokemonDetails.get(p.name);
-          const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-          
+          const imageUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+
           return (
             <Link href={`/pokemon/${p.name}`} key={p.name} className="group">
               <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden border-muted">
                 <CardHeader className="p-4 bg-muted/20 group-hover:bg-muted/40 transition-colors">
                   <div className="relative w-full aspect-square">
-                    <Image 
-                      src={imageUrl} 
+                    <Image
+                      src={imageUrl}
                       alt={p.name}
                       fill
                       className="object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
@@ -195,8 +195,8 @@ export function PokemonInfiniteList({
                   {details && (
                     <div className="flex flex-wrap gap-1 justify-center">
                       {details.types.map((t) => (
-                        <Badge 
-                          key={t.type.name} 
+                        <Badge
+                          key={t.type.name}
                           className={`text-white text-xs capitalize ${typeColors[t.type.name] || 'bg-gray-500'}`}
                         >
                           {t.type.name}
