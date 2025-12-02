@@ -33,7 +33,8 @@ export default async function SpecsPage({ params }: { params: Promise<{ name: st
   try {
     species = await PokeAPI.species(name) as PokemonSpecies;
   } catch {
-    // Ignore species fetch errors
+    // Species data is optional - page will still render with basic Pokemon info
+    // Some Pokemon may not have species data available in the API
   }
 
   // Get French description or fall back to English
