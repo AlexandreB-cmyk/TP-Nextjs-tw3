@@ -17,18 +17,18 @@ export const metadata: Metadata = {
 
 export default function Page() {
   return (
-    <div className="flex flex-col items-center min-h-svh py-20 gap-20">
+    <div className="flex flex-col items-center min-h-svh py-10 sm:py-16 md:py-20 gap-12 sm:gap-16 md:gap-20">
       {/* Hero Section */}
-      <div className="flex flex-col lg:flex-row items-center justify-center gap-12 lg:gap-24 w-full max-w-7xl px-6">
-        <div className="flex flex-col items-center lg:items-start justify-center gap-6 max-w-xl text-center lg:text-left">
+      <div className="flex flex-col lg:flex-row items-center justify-center gap-8 sm:gap-12 lg:gap-24 w-full max-w-7xl px-4 sm:px-6">
+        <div className="flex flex-col items-center lg:items-start justify-center gap-4 sm:gap-6 max-w-xl text-center lg:text-left">
           <Title level="homepage">Next.js Avancé</Title>
           <Text size="lead">
             Bienvenue dans cette application Next.js avancée avec une configuration
             monorepo et des composants réutilisables !
           </Text>
-          <div className="flex gap-4">
-             <Button variant="default">Commencer le TP</Button>
-             <Button variant="outline">Documentation</Button>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full sm:w-auto">
+             <Button variant="default" className="w-full sm:w-auto">Commencer le TP</Button>
+             <Button variant="outline" className="w-full sm:w-auto">Documentation</Button>
           </div>
         </div>
         <div className="flex flex-col items-center justify-center gap-4 w-full max-w-md">
@@ -37,7 +37,7 @@ export default function Page() {
       </div>
 
       {/* Educational Section */}
-      <div className="w-full max-w-7xl px-6 space-y-20">
+      <div className="w-full max-w-7xl px-4 sm:px-6 space-y-12 sm:space-y-16 md:space-y-20">
         <MonorepoAdvantages />
         <TurboJsonExplanation />
       </div>

@@ -3,7 +3,6 @@ import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/componen
 import { Text } from "@/components/Text";
 import { Badge } from "@workspace/ui/components/badge";
 import Link from "next/link";
-import { notFound } from "next/navigation";
 
 // Type definitions
 interface Pokemon {
@@ -26,16 +25,16 @@ export default async function MovesPage({ params }: { params: Promise<{ name: st
     <>
       {/* Moves */}
       {moves.length > 0 && (
-        <Card className="p-6 mb-8">
-          <CardHeader className="p-0 pb-4">
-            <CardTitle>Capacités (Moves)</CardTitle>
-            <Text className="text-sm text-muted-foreground">Quelques capacités que ce Pokémon peut apprendre</Text>
+        <Card className="p-4 sm:p-6 mb-6 sm:mb-8">
+          <CardHeader className="p-0 pb-3 sm:pb-4">
+            <CardTitle className="text-base sm:text-lg">Capacités (Moves)</CardTitle>
+            <Text className="text-xs sm:text-sm text-muted-foreground !mt-1">Quelques capacités que ce Pokémon peut apprendre</Text>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {moves.map((m) => (
                 <Link key={m.move.name} href={`/pokemon/move/${m.move.name}`}>
-                  <Badge variant="outline" className="capitalize cursor-pointer hover:bg-muted">
+                  <Badge variant="outline" className="capitalize cursor-pointer hover:bg-muted text-xs sm:text-sm">
                     {m.move.name.replace('-', ' ')}
                   </Badge>
                 </Link>
@@ -47,14 +46,14 @@ export default async function MovesPage({ params }: { params: Promise<{ name: st
 
       {/* Game Appearances */}
       {gameIndices.length > 0 && (
-        <Card className="p-6">
-          <CardHeader className="p-0 pb-4">
-            <CardTitle>Apparitions dans les jeux</CardTitle>
+        <Card className="p-4 sm:p-6">
+          <CardHeader className="p-0 pb-3 sm:pb-4">
+            <CardTitle className="text-base sm:text-lg">Apparitions dans les jeux</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {gameIndices.map((g) => (
-                <Badge key={g.version.name} variant="secondary" className="capitalize">
+                <Badge key={g.version.name} variant="secondary" className="capitalize text-xs sm:text-sm">
                   {g.version.name.replace('-', ' ')}
                 </Badge>
               ))}

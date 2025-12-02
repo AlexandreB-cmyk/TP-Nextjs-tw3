@@ -6,11 +6,11 @@ import { cn } from '@workspace/ui/lib/utils'; // Assurez-vous d'avoir la fonctio
  * Ces styles sont basés sur les conventions typographiques courantes.
  */
 const titleStyles = {
-    h1: 'scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl',
-    h2: 'scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0',
-    h3: 'scroll-m-20 text-2xl font-semibold tracking-tight',
-    h4: 'scroll-m-20 text-xl font-semibold tracking-tight',
-    homepage: 'scroll-m-20 text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter text-center leading-none',
+    h1: 'scroll-m-20 text-3xl sm:text-4xl font-extrabold tracking-tight lg:text-5xl',
+    h2: 'scroll-m-20 border-b pb-2 text-2xl sm:text-3xl font-semibold tracking-tight first:mt-0',
+    h3: 'scroll-m-20 text-xl sm:text-2xl font-semibold tracking-tight',
+    h4: 'scroll-m-20 text-lg sm:text-xl font-semibold tracking-tight',
+    homepage: 'scroll-m-20 text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tighter text-center leading-none',
 } as const; // 'as const' pour TypeScript pour des types stricts
 
 type TitleLevel = keyof typeof titleStyles;

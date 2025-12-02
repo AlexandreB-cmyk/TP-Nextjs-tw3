@@ -2,7 +2,6 @@ import { PokeAPI } from "@workspace/pokeapi";
 import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/components/card";
 import Link from "next/link";
 import { PokemonImage } from "@/components/PokemonImage";
-import { notFound } from "next/navigation";
 
 // Type definitions
 interface PokemonSpecies {
@@ -64,17 +63,17 @@ export default async function EvolutionPage({ params }: { params: Promise<{ name
     }
 
     return (
-        <Card className="p-6 mb-8">
-            <CardHeader className="p-0 pb-4">
-                <CardTitle>Chaîne d&apos;évolution</CardTitle>
+        <Card className="p-4 sm:p-6 mb-6 sm:mb-8">
+            <CardHeader className="p-0 pb-3 sm:pb-4">
+                <CardTitle className="text-base sm:text-lg">Chaîne d&apos;évolution</CardTitle>
             </CardHeader>
             <CardContent className="p-0">
-                <div className="flex flex-wrap items-center justify-center gap-4">
+                <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4">
                     {evolutions.map((evo, index) => (
-                        <div key={evo.name} className="flex items-center gap-4">
+                        <div key={evo.name} className="flex items-center gap-2 sm:gap-4">
                             <Link href={`/pokemon/${evo.name}`} className="group">
-                                <div className="flex flex-col items-center p-4 rounded-lg hover:bg-muted/50 transition-colors">
-                                    <div className="relative w-20 h-20 mb-2">
+                                <div className="flex flex-col items-center p-2 sm:p-4 rounded-lg hover:bg-muted/50 transition-colors">
+                                    <div className="relative w-14 h-14 sm:w-20 sm:h-20 mb-1 sm:mb-2">
                                         <PokemonImage
                                             src={`https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${evo.id}.png`}
                                             alt={evo.name}
@@ -83,16 +82,16 @@ export default async function EvolutionPage({ params }: { params: Promise<{ name
                                             style={{ imageRendering: 'pixelated' }}
                                         />
                                     </div>
-                                    <span className={`capitalize text-sm font-medium ${evo.name === name ? 'text-primary' : ''}`}>
+                                    <span className={`capitalize text-xs sm:text-sm font-medium ${evo.name === name ? 'text-primary' : ''}`}>
                                         {evo.name}
                                     </span>
                                     {evo.level && (
-                                        <span className="text-xs text-muted-foreground">Niv. {evo.level}</span>
+                                        <span className="text-[10px] sm:text-xs text-muted-foreground">Niv. {evo.level}</span>
                                     )}
                                 </div>
                             </Link>
                             {index < evolutions.length - 1 && (
-                                <span className="text-2xl text-muted-foreground">→</span>
+                                <span className="text-lg sm:text-2xl text-muted-foreground">→</span>
                             )}
                         </div>
                     ))}

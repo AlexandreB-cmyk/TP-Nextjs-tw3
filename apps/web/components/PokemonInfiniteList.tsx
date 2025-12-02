@@ -178,7 +178,7 @@ console.log('Rendering PokemonInfiniteList with', { searchQuery, typeFilter });
 
   return (
     <>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
         {pokemonList.map((p) => {
           const id = getIdFromUrl(p.url);
           const details = pokemonDetails.get(p.name);
@@ -187,26 +187,26 @@ console.log('Rendering PokemonInfiniteList with', { searchQuery, typeFilter });
           return (
             <Link href={`/pokemon/${p.name}`} key={p.name} className="group">
               <Card className="h-full hover:shadow-lg transition-shadow overflow-hidden border-muted">
-                <CardHeader className="p-4 bg-muted/20 group-hover:bg-muted/40 transition-colors">
+                <CardHeader className="p-2 sm:p-4 bg-muted/20 group-hover:bg-muted/40 transition-colors">
                   <div className="relative w-full aspect-square">
                     <Image
                       src={imageUrl}
                       alt={p.name}
                       fill
                       className="object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-300"
-                      sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                      sizes="(max-width: 640px) 50vw, (max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                     />
                   </div>
                 </CardHeader>
-                <CardContent className="p-4 text-center space-y-2">
+                <CardContent className="p-2 sm:p-4 text-center space-y-1 sm:space-y-2">
                   <span className="text-xs font-mono text-muted-foreground">#{id.padStart(3, '0')}</span>
-                  <CardTitle className="capitalize text-lg">{p.name}</CardTitle>
+                  <CardTitle className="capitalize text-sm sm:text-lg">{p.name}</CardTitle>
                   {details && (
                     <div className="flex flex-wrap gap-1 justify-center">
                       {details.types.map((t) => (
                         <Badge
                           key={t.type.name}
-                          className={`text-white text-xs capitalize ${typeColors[t.type.name] || 'bg-gray-500'}`}
+                          className={`text-white text-[10px] sm:text-xs capitalize ${typeColors[t.type.name] || 'bg-gray-500'}`}
                         >
                           {t.type.name}
                         </Badge>
@@ -221,7 +221,7 @@ console.log('Rendering PokemonInfiniteList with', { searchQuery, typeFilter });
       </div>
 
       {/* Infinite scroll trigger */}
-      <div ref={loadMoreRef} className="py-8 flex justify-center">
+      <div ref={loadMoreRef} className="py-6 sm:py-8 flex justify-center">
         {loading && (
           <div className="flex items-center gap-2 text-muted-foreground">
             <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
