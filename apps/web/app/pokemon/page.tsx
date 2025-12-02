@@ -53,21 +53,21 @@ export default async function PokemonPage({
   }
 
   return (
-    <div className="container mx-auto py-10 px-4 space-y-8">
-      <div className="flex flex-col items-center text-center space-y-4">
+    <div className="container mx-auto py-6 sm:py-8 md:py-10 px-4 space-y-6 sm:space-y-8">
+      <div className="flex flex-col items-center text-center space-y-3 sm:space-y-4">
         <Title level="h1">Pokédex</Title>
         <Text size="lg" className="max-w-2xl">
           Explorez le monde des Pokémon via notre API intégrée. 
           Utilisez la recherche pour filtrer par nom, ou faites défiler pour découvrir plus de Pokémon !
         </Text>
-        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl justify-center items-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 w-full max-w-2xl justify-center items-center">
           <PokemonSearch />
           <PokemonFilters />
           <Button 
             variant="outline" 
             size="icon"
             asChild
-            className={!query && !typeFilter ? "opacity-50 pointer-events-none" : ""}
+            className={`shrink-0 ${!query && !typeFilter ? "opacity-50 pointer-events-none" : ""}`}
             title="Réinitialiser les filtres"
           >
             <Link href="/pokemon">
@@ -86,7 +86,7 @@ export default async function PokemonPage({
       />
       
       {pokemonList.length === 0 && (
-        <div className="text-center py-20">
+        <div className="text-center py-12 sm:py-16 md:py-20">
             <Text>
               Aucun Pokémon trouvé
               {query && ` pour "${query}"`}

@@ -15,15 +15,15 @@ export const metadata: Metadata = {
 
 export default function PackagesPage() {
   return (
-    <div className="flex flex-col items-center min-h-svh py-20 gap-10">
-      <div className="w-full max-w-5xl px-6">
-        <div className="mb-8">
+    <div className="flex flex-col items-center min-h-svh py-10 sm:py-16 md:py-20 gap-6 sm:gap-8 md:gap-10">
+      <div className="w-full max-w-5xl px-4 sm:px-6">
+        <div className="mb-6 sm:mb-8">
             <Link href="/">
-                <Button variant="outline" size="sm">← Retour à l'accueil</Button>
+                <Button variant="outline" size="sm">← Retour à l&apos;accueil</Button>
             </Link>
         </div>
         
-        <Title level="homepage" className="mb-12">Gestion des Packages</Title>
+        <Title level="homepage" className="mb-8 sm:mb-10 md:mb-12">Gestion des Packages</Title>
         
         <PackageExplanation />
       </div>

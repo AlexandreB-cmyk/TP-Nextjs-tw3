@@ -22,24 +22,24 @@ const steps = [
 
 export function PackageExplanation() {
   return (
-    <section className="py-10 space-y-6">
-      <div className="space-y-4">
+    <section className="py-6 sm:py-8 md:py-10 space-y-4 sm:space-y-6">
+      <div className="space-y-3 sm:space-y-4">
         <Title level="h2">Comprendre et Utiliser le Package UI</Title>
         <Text size="lg">
-          L'un des plus grands atouts de notre monorepo est la capacité d'isoler le code réutilisable dans des "packages".
-          Prenons l'exemple de notre dossier <code>packages/ui</code> qui contient nos composants graphiques partagés.
+          L&apos;un des plus grands atouts de notre monorepo est la capacité d&apos;isoler le code réutilisable dans des &quot;packages&quot;.
+          Prenons l&apos;exemple de notre dossier <code>packages/ui</code> qui contient nos composants graphiques partagés.
         </Text>
         <Text>
-          Au lieu de copier-coller des boutons et des champs de texte d'un projet à l'autre, nous les centralisons ici.
+          Au lieu de copier-coller des boutons et des champs de texte d&apos;un projet à l&apos;autre, nous les centralisons ici.
           Voici comment cela fonctionne sous le capot :
         </Text>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mt-6 sm:mt-8">
         {steps.map((step, index) => (
           <div
             key={index}
-            className="p-6 border rounded-xl shadow-sm bg-card text-card-foreground hover:shadow-md transition-shadow"
+            className="p-4 sm:p-6 border rounded-xl shadow-sm bg-card text-card-foreground hover:shadow-md transition-shadow"
           >
             <Title level="h3">{step.title}</Title>
             <Text size="sm">
@@ -52,9 +52,9 @@ export function PackageExplanation() {
         ))}
       </div>
 
-      <div className="mt-8 space-y-4">
+      <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
         <Title level="h3">Exemple Concret : package.json</Title>
-        <div className="bg-slate-950 text-slate-50 p-4 rounded-lg overflow-x-auto font-mono text-sm border border-slate-800">
+        <div className="bg-slate-950 text-slate-50 p-3 sm:p-4 rounded-lg overflow-x-auto font-mono text-xs sm:text-sm border border-slate-800">
 <pre>{`// packages/ui/package.json
 {
   "name": "@workspace/ui",

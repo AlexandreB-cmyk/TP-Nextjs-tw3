@@ -46,13 +46,13 @@ export function PokemonStats({ stats }: PokemonStatsProps) {
 
   return (
     <Card className="flex flex-col">
-      <CardHeader className="items-center pb-4">
-        <CardTitle>Statistiques (Radar)</CardTitle>
+      <CardHeader className="items-center pb-2 sm:pb-4">
+        <CardTitle className="text-base sm:text-lg">Statistiques (Radar)</CardTitle>
       </CardHeader>
-      <CardContent className="pb-0">
+      <CardContent className="pb-0 px-2 sm:px-6">
         <ChartContainer
           config={chartConfig}
-          className="mx-auto aspect-square max-h-[300px]"
+          className="mx-auto aspect-square max-h-[250px] sm:max-h-[300px]"
         >
           <RadarChart data={chartData}>
             <ChartTooltip
@@ -60,7 +60,7 @@ export function PokemonStats({ stats }: PokemonStatsProps) {
               content={<ChartTooltipContent hideLabel />}
             />
             <PolarGrid className="fill-[--color-chart-1] opacity-20" />
-            <PolarAngleAxis dataKey="subject" />
+            <PolarAngleAxis dataKey="subject" tick={{ fontSize: 10 }} />
             <Radar
               dataKey="value"
               name="Stats"

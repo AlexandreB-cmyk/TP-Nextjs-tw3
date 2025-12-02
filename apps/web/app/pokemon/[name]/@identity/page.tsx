@@ -2,7 +2,6 @@ import { PokeAPI } from "@workspace/pokeapi";
 import { Badge } from "@workspace/ui/components/badge";
 import { Card, CardTitle } from "@workspace/ui/components/card";
 import { PokemonImage } from "@/components/PokemonImage";
-import { notFound } from "next/navigation";
 
 // Type definitions
 interface Pokemon {
@@ -44,24 +43,24 @@ export default async function IdentityPage({ params }: { params: Promise<{ name:
   const pokemon = await PokeAPI.pokemon(name) as Pokemon;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <Card className="overflow-hidden border-2">
-        <div className="bg-muted/30 p-8 flex justify-center items-center aspect-square relative">
+        <div className="bg-muted/30 p-4 sm:p-6 md:p-8 flex justify-center items-center aspect-square relative">
           <PokemonImage
             src={pokemon.sprites.other['official-artwork'].front_default || pokemon.sprites.front_default}
             alt={pokemon.name}
             fill
-            className="object-contain p-4 drop-shadow-xl"
+            className="object-contain p-2 sm:p-4 drop-shadow-xl"
             priority
           />
         </div>
       </Card>
 
-      <div className="flex gap-2 justify-center">
+      <div className="flex gap-2 justify-center flex-wrap">
         {pokemon.types.map((t) => (
           <Badge
             key={t.type.name}
-            className={`text-white px-4 py-1 text-base capitalize ${typeColors[t.type.name] || 'bg-gray-500'}`}
+            className={`text-white px-3 sm:px-4 py-1 text-sm sm:text-base capitalize ${typeColors[t.type.name] || 'bg-gray-500'}`}
           >
             {t.type.name}
           </Badge>
@@ -70,10 +69,10 @@ export default async function IdentityPage({ params }: { params: Promise<{ name:
 
       {/* Shiny variant */}
       {pokemon.sprites.front_shiny && (
-        <Card className="p-4">
-          <CardTitle className="text-sm text-center mb-3 text-muted-foreground">Variante Chromatique (Shiny)</CardTitle>
-          <div className="flex justify-center gap-4">
-            <div className="relative w-24 h-24">
+        <Card className="p-3 sm:p-4">
+          <CardTitle className="text-xs sm:text-sm text-center mb-2 sm:mb-3 text-muted-foreground">Variante Chromatique (Shiny)</CardTitle>
+          <div className="flex justify-center gap-3 sm:gap-4">
+            <div className="relative w-16 h-16 sm:w-24 sm:h-24">
               <PokemonImage
                 src={pokemon.sprites.front_shiny}
                 alt={`${pokemon.name} shiny`}
@@ -83,7 +82,7 @@ export default async function IdentityPage({ params }: { params: Promise<{ name:
               />
             </div>
             {pokemon.sprites.other['official-artwork'].front_shiny && (
-              <div className="relative w-24 h-24">
+              <div className="relative w-16 h-16 sm:w-24 sm:h-24">
                 <PokemonImage
                   src={pokemon.sprites.other['official-artwork'].front_shiny}
                   alt={`${pokemon.name} shiny artwork`}
