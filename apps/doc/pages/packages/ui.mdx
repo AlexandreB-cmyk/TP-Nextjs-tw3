@@ -1,0 +1,232 @@
+# @workspace/ui
+
+Le package `@workspace/ui` contient les composants UI partagés, basés sur [shadcn/ui](https://ui.shadcn.com/).
+
+## Installation
+
+Ce package fait partie du monorepo et est automatiquement disponible via l'alias `@workspace/ui`.
+
+## Utilisation
+
+```tsx
+import { Button } from "@workspace/ui/components/button"
+import { Card, CardHeader, CardTitle, CardContent } from "@workspace/ui/components/card"
+```
+
+## Composants disponibles
+
+### Button
+
+Bouton avec différentes variantes et tailles.
+
+```tsx
+import { Button } from "@workspace/ui/components/button"
+
+// Variantes
+<Button variant="default">Default</Button>
+<Button variant="destructive">Destructive</Button>
+<Button variant="outline">Outline</Button>
+<Button variant="secondary">Secondary</Button>
+<Button variant="ghost">Ghost</Button>
+<Button variant="link">Link</Button>
+
+// Tailles
+<Button size="default">Default</Button>
+<Button size="sm">Small</Button>
+<Button size="lg">Large</Button>
+<Button size="icon">🔍</Button>
+```
+
+#### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `variant` | `'default' \| 'destructive' \| 'outline' \| 'secondary' \| 'ghost' \| 'link'` | Style du bouton |
+| `size` | `'default' \| 'sm' \| 'lg' \| 'icon'` | Taille du bouton |
+| `asChild` | `boolean` | Utiliser un composant enfant comme élément |
+
+### Card
+
+Composant de carte pour afficher du contenu structuré.
+
+```tsx
+import { 
+  Card, 
+  CardHeader, 
+  CardTitle, 
+  CardDescription, 
+  CardContent, 
+  CardFooter 
+} from "@workspace/ui/components/card"
+
+<Card>
+  <CardHeader>
+    <CardTitle>Titre de la carte</CardTitle>
+    <CardDescription>Description optionnelle</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <p>Contenu de la carte</p>
+  </CardContent>
+  <CardFooter>
+    <Button>Action</Button>
+  </CardFooter>
+</Card>
+```
+
+### Input
+
+Champ de saisie stylisé.
+
+```tsx
+import { Input } from "@workspace/ui/components/input"
+
+<Input type="text" placeholder="Entrez du texte..." />
+<Input type="email" placeholder="email@exemple.com" />
+<Input type="password" placeholder="Mot de passe" />
+```
+
+### Select
+
+Menu déroulant pour la sélection.
+
+```tsx
+import { 
+  Select, 
+  SelectTrigger, 
+  SelectValue, 
+  SelectContent, 
+  SelectItem 
+} from "@workspace/ui/components/select"
+
+<Select>
+  <SelectTrigger>
+    <SelectValue placeholder="Choisir une option" />
+  </SelectTrigger>
+  <SelectContent>
+    <SelectItem value="option1">Option 1</SelectItem>
+    <SelectItem value="option2">Option 2</SelectItem>
+    <SelectItem value="option3">Option 3</SelectItem>
+  </SelectContent>
+</Select>
+```
+
+### Badge
+
+Étiquettes pour afficher des statuts ou catégories.
+
+```tsx
+import { Badge } from "@workspace/ui/components/badge"
+
+<Badge>Default</Badge>
+<Badge variant="secondary">Secondary</Badge>
+<Badge variant="outline">Outline</Badge>
+<Badge variant="destructive">Destructive</Badge>
+```
+
+### Skeleton
+
+Placeholder de chargement animé.
+
+```tsx
+import { Skeleton } from "@workspace/ui/components/skeleton"
+
+<Skeleton className="h-4 w-[200px]" />
+<Skeleton className="h-12 w-12 rounded-full" />
+```
+
+### Table
+
+Composants pour afficher des données tabulaires.
+
+```tsx
+import { 
+  Table, 
+  TableHeader, 
+  TableBody, 
+  TableRow, 
+  TableHead, 
+  TableCell 
+} from "@workspace/ui/components/table"
+
+<Table>
+  <TableHeader>
+    <TableRow>
+      <TableHead>Nom</TableHead>
+      <TableHead>Type</TableHead>
+    </TableRow>
+  </TableHeader>
+  <TableBody>
+    <TableRow>
+      <TableCell>Pikachu</TableCell>
+      <TableCell>Électrique</TableCell>
+    </TableRow>
+  </TableBody>
+</Table>
+```
+
+### Chart
+
+Graphiques basés sur Recharts.
+
+```tsx
+import { ChartContainer, ChartTooltip } from "@workspace/ui/components/chart"
+import { BarChart, Bar, XAxis, YAxis } from "recharts"
+
+<ChartContainer config={{ ... }}>
+  <BarChart data={data}>
+    <XAxis dataKey="name" />
+    <YAxis />
+    <Bar dataKey="value" />
+    <ChartTooltip />
+  </BarChart>
+</ChartContainer>
+```
+
+### NavigationMenu
+
+Menu de navigation horizontal.
+
+```tsx
+import { 
+  NavigationMenu, 
+  NavigationMenuList, 
+  NavigationMenuItem, 
+  NavigationMenuLink 
+} from "@workspace/ui/components/navigation-menu"
+
+<NavigationMenu>
+  <NavigationMenuList>
+    <NavigationMenuItem>
+      <NavigationMenuLink href="/">Accueil</NavigationMenuLink>
+    </NavigationMenuItem>
+  </NavigationMenuList>
+</NavigationMenu>
+```
+
+## Utilitaires
+
+### `cn()` - Fusion de classes
+
+```tsx
+import { cn } from "@workspace/ui/lib/utils"
+
+<div className={cn("base-class", condition && "conditional-class")} />
+```
+
+## Styles globaux
+
+Importez les styles globaux dans votre application :
+
+```tsx
+import "@workspace/ui/globals.css"
+```
+
+## Ajouter de nouveaux composants
+
+Pour ajouter un composant shadcn/ui au package :
+
+```bash
+pnpm dlx shadcn@latest add <component-name> -c apps/web
+```
+
+Les composants seront ajoutés dans `packages/ui/src/components/`.

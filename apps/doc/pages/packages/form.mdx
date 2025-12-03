@@ -1,0 +1,285 @@
+# @workspace/form
+
+Le package `@workspace/form` fournit des composants et hooks pour la gestion des formulaires avec validation Zod.
+
+## Installation
+
+Ce package fait partie du monorepo et est automatiquement disponible via l'alias `@workspace/form`.
+
+## Concepts clés
+
+Le package utilise un pattern similaire à **React Hook Form** avec :
+- Un contexte React pour partager l'état du formulaire
+- La fonction `register()` pour connecter les champs
+- Validation automatique avec Zod
+- Gestion des erreurs et de l'état "touched"
+
+## Utilisation de base
+
+### Avec le composant Form
+
+```tsx
+import { Form } from "@workspace/form/components/Form"
+import { FormField } from "@workspace/form/components/FormField"
+import { FormLabel } from "@workspace/form/components/FormLabel"
+import { FormControl } from "@workspace/form/components/FormControl"
+import { FormMessage } from "@workspace/form/components/FormMessage"
+import { FormSubmitButton } from "@workspace/form/components/FormSubmitButton"
+import { z } from "zod"
+
+// Définir le schéma de validation
+const schema = z.object({
+  name: z.string().min(2, "Le nom doit avoir au moins 2 caractères"),
+  email: z.string().email("Email invalide"),
+})
+
+type FormValues = z.infer<typeof schema>
+
+function MyForm() {
+  const handleSubmit = (values: FormValues) => {
+    console.log("Formulaire soumis:", values)
+  }
+
+  return (
+    <Form
+      initialValues={{ name: "", email: "" }}
+      schema={schema}
+      onSubmit={handleSubmit}
+    >
+      <FormField name="name">
+        <FormLabel>Nom</FormLabel>
+        <FormControl>
+          <input type="text" />
+        </FormControl>
+        <FormMessage />
+      </FormField>
+
+      <FormField name="email">
+        <FormLabel>Email</FormLabel>
+        <FormControl>
+          <input type="email" />
+        </FormControl>
+        <FormMessage />
+      </FormField>
+
+      <FormSubmitButton>Envoyer</FormSubmitButton>
+    </Form>
+  )
+}
+```
+
+### Avec le hook useForm
+
+```tsx
+import { useForm } from "@workspace/form/hooks/useForm"
+import { z } from "zod"
+
+const schema = z.object({
+  username: z.string().min(3),
+  password: z.string().min(8),
+})
+
+function LoginForm() {
+  const {
+    values,
+    errors,
+    touched,
+    isSubmitting,
+    register,
+    handleSubmit,
+  } = useForm({
+    initialValues: { username: "", password: "" },
+    schema,
+    onSubmit: async (values) => {
+      await login(values)
+    },
+  })
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input {...register("username")} />
+      {touched.username && errors.username && (
+        <span className="error">{errors.username}</span>
+      )}
+
+      <input type="password" {...register("password")} />
+      {touched.password && errors.password && (
+        <span className="error">{errors.password}</span>
+      )}
+
+      <button type="submit" disabled={isSubmitting}>
+        {isSubmitting ? "Connexion..." : "Se connecter"}
+      </button>
+    </form>
+  )
+}
+```
+
+## Composants
+
+### Form
+
+Conteneur principal qui gère l'état du formulaire.
+
+```tsx
+<Form
+  initialValues={{ ... }}  // Valeurs initiales
+  schema={zodSchema}       // Schéma Zod (optionnel)
+  onSubmit={handleSubmit}  // Handler de soumission
+>
+  {/* Contenu du formulaire */}
+</Form>
+```
+
+### FormField
+
+Wrapper pour un champ de formulaire.
+
+```tsx
+<FormField name="fieldName">
+  {/* Label, contrôle, message d'erreur */}
+</FormField>
+```
+
+### FormLabel
+
+Label associé au champ.
+
+```tsx
+<FormLabel>Nom du champ</FormLabel>
+```
+
+### FormControl
+
+Container pour l'élément de saisie.
+
+```tsx
+<FormControl>
+  <input type="text" />
+</FormControl>
+```
+
+### FormDescription
+
+Texte d'aide optionnel.
+
+```tsx
+<FormDescription>
+  Ce champ est utilisé pour...
+</FormDescription>
+```
+
+### FormMessage
+
+Affiche les messages d'erreur de validation.
+
+```tsx
+<FormMessage />
+```
+
+### FormSubmitButton
+
+Bouton de soumission avec état de chargement.
+
+```tsx
+<FormSubmitButton>
+  Envoyer
+</FormSubmitButton>
+```
+
+## Hooks
+
+### useForm
+
+Hook pour gérer l'état et la validation du formulaire.
+
+```tsx
+const {
+  values,      // Valeurs actuelles
+  errors,      // Erreurs de validation
+  touched,     // Champs touchés
+  isSubmitting,// En cours de soumission
+  isValid,     // Formulaire valide
+  setValue,    // Modifier une valeur
+  setError,    // Définir une erreur
+  setTouched,  // Marquer comme touché
+  validate,    // Valider manuellement
+  reset,       // Réinitialiser
+  handleSubmit,// Gestionnaire de soumission
+  register,    // Enregistrer un champ
+} = useForm(options)
+```
+
+### useFormContext
+
+Accéder au contexte du formulaire depuis un composant enfant.
+
+```tsx
+import { useFormContext } from "@workspace/form/context/FormContext"
+
+function CustomField() {
+  const { state, setValue } = useFormContext()
+  // ...
+}
+```
+
+## Validation avec Zod
+
+### Schémas courants
+
+```tsx
+import { z } from "zod"
+
+// Texte requis
+const name = z.string().min(1, "Champ requis")
+
+// Email
+const email = z.string().email("Email invalide")
+
+// Mot de passe
+const password = z
+  .string()
+  .min(8, "Minimum 8 caractères")
+  .regex(/[A-Z]/, "Doit contenir une majuscule")
+  .regex(/[0-9]/, "Doit contenir un chiffre")
+
+// Nombre
+const age = z.number().min(18, "Doit être majeur")
+
+// Checkbox
+const acceptTerms = z.literal(true, {
+  errorMap: () => ({ message: "Vous devez accepter les conditions" }),
+})
+```
+
+### Validation conditionnelle
+
+```tsx
+const schema = z.object({
+  hasPhone: z.boolean(),
+  phone: z.string().optional(),
+}).refine(
+  (data) => !data.hasPhone || data.phone,
+  { message: "Téléphone requis", path: ["phone"] }
+)
+```
+
+## Types exportés
+
+```tsx
+import type { 
+  FormFieldState,
+  FormState,
+  FormContextValue,
+  FormProviderProps,
+  UseFormOptions,
+  UseFormReturn,
+} from "@workspace/form/context/FormContext"
+```
+
+## Bonnes pratiques
+
+1. **Toujours définir un schéma Zod** pour une validation cohérente
+2. **Utiliser `FormMessage`** pour afficher les erreurs
+3. **Désactiver le bouton** pendant la soumission avec `isSubmitting`
+4. **Afficher les erreurs après `touched`** pour une meilleure UX

@@ -1,0 +1,284 @@
+# @workspace/pokeapi
+
+Le package `@workspace/pokeapi` est un client HTTP pour l'API [PokeAPI](https://pokeapi.co/).
+
+## Installation
+
+Ce package fait partie du monorepo et est automatiquement disponible via l'alias `@workspace/pokeapi`.
+
+## Utilisation
+
+```tsx
+import { PokeAPI } from "@workspace/pokeapi"
+
+// Récupérer un Pokémon
+const pikachu = await PokeAPI.pokemon("pikachu")
+
+// Lister les Pokémon
+const pokemons = await PokeAPI.listPokemon(20, 0)
+```
+
+## Architecture
+
+Le client est organisé autour d'un objet `PokeAPI` qui expose des méthodes pour chaque ressource de l'API.
+
+```
+packages/pokeapi/
+├── src/
+│   ├── index.ts              # Point d'entrée
+│   ├── pokeapi-client.ts     # Client principal
+│   └── pokeapi-client.test.ts # Tests
+├── package.json
+└── tsconfig.json
+```
+
+## Types exportés
+
+### NamedAPIResource
+
+Représente une ressource avec un nom et une URL.
+
+```tsx
+type NamedAPIResource = {
+  name: string
+  url: string
+}
+```
+
+### `Paginated<T>`
+
+Structure des réponses paginées.
+
+```tsx
+type Paginated<T> = {
+  count: number         // Nombre total d'éléments
+  next: string | null   // URL page suivante
+  previous: string | null // URL page précédente
+  results: T[]          // Éléments de la page
+}
+```
+
+## Méthodes disponibles
+
+### Pokémon
+
+#### `PokeAPI.pokemon(nameOrId)`
+
+Récupère les données complètes d'un Pokémon.
+
+```tsx
+const data = await PokeAPI.pokemon("pikachu")
+// ou avec un ID
+const data = await PokeAPI.pokemon(25)
+```
+
+**Retourne :** Toutes les informations du Pokémon (stats, types, sprites, etc.)
+
+#### `PokeAPI.listPokemon(limit, offset)`
+
+Liste les Pokémon avec pagination.
+
+```tsx
+// 20 premiers Pokémon
+const page1 = await PokeAPI.listPokemon(20, 0)
+
+// 20 Pokémon suivants
+const page2 = await PokeAPI.listPokemon(20, 20)
+```
+
+**Paramètres :**
+- `limit` (défaut: 20) - Nombre de résultats par page
+- `offset` (défaut: 0) - Index de départ
+
+#### `PokeAPI.searchPokemonByName(query, limit)`
+
+Recherche des Pokémon par nom.
+
+```tsx
+const results = await PokeAPI.searchPokemonByName("char")
+// Trouve: charmander, charmeleon, charizard
+```
+
+> ⚠️ **Note :** Cette méthode charge tous les Pokémon puis filtre côté client.
+
+### Types
+
+#### `PokeAPI.type(nameOrId)`
+
+Récupère les données d'un type.
+
+```tsx
+const fireType = await PokeAPI.type("fire")
+```
+
+#### `PokeAPI.listTypes()`
+
+Liste tous les types de Pokémon.
+
+```tsx
+const types = await PokeAPI.listTypes()
+// Retourne: fire, water, grass, electric, ...
+```
+
+#### `PokeAPI.getPokemonByType(typeName)`
+
+Récupère tous les Pokémon d'un type.
+
+```tsx
+const firePokemons = await PokeAPI.getPokemonByType("fire")
+```
+
+### Capacités (Abilities)
+
+#### `PokeAPI.ability(nameOrId)`
+
+Récupère les données d'une capacité.
+
+```tsx
+const static = await PokeAPI.ability("static")
+```
+
+#### `PokeAPI.listAbilities(limit, offset)`
+
+Liste les capacités avec pagination.
+
+```tsx
+const abilities = await PokeAPI.listAbilities(50, 0)
+```
+
+### Attaques (Moves)
+
+#### `PokeAPI.move(nameOrId)`
+
+Récupère les données d'une attaque.
+
+```tsx
+const thunderbolt = await PokeAPI.move("thunderbolt")
+```
+
+#### `PokeAPI.listMoves(limit, offset)`
+
+Liste les attaques avec pagination.
+
+```tsx
+const moves = await PokeAPI.listMoves(100, 0)
+```
+
+### Baies (Berries)
+
+#### `PokeAPI.berry(nameOrId)`
+
+Récupère les données d'une baie.
+
+```tsx
+const oran = await PokeAPI.berry("oran")
+```
+
+#### `PokeAPI.listBerries(limit, offset)`
+
+Liste les baies avec pagination.
+
+```tsx
+const berries = await PokeAPI.listBerries(20, 0)
+```
+
+### Autres ressources
+
+#### `PokeAPI.species(nameOrId)`
+
+Données d'espèce (évolutions, descriptions).
+
+```tsx
+const species = await PokeAPI.species("pikachu")
+```
+
+#### `PokeAPI.item(nameOrId)`
+
+Données d'un objet.
+
+```tsx
+const potion = await PokeAPI.item("potion")
+```
+
+#### `PokeAPI.location(nameOrId)`
+
+Données d'une localisation.
+
+```tsx
+const palletTown = await PokeAPI.location("pallet-town")
+```
+
+#### `PokeAPI.generation(nameOrId)`
+
+Données d'une génération.
+
+```tsx
+const gen1 = await PokeAPI.generation(1)
+```
+
+## Gestion des erreurs
+
+Le client lève une erreur si la requête échoue :
+
+```tsx
+try {
+  const pokemon = await PokeAPI.pokemon("invalid-name")
+} catch (error) {
+  // Error: PokeAPI error 404: Not Found
+}
+```
+
+## Utilisation dans Next.js
+
+### Server Component
+
+```tsx
+// app/pokemon/[name]/page.tsx
+import { PokeAPI } from "@workspace/pokeapi"
+
+export default async function PokemonPage({ 
+  params 
+}: { 
+  params: Promise<{ name: string }> 
+}) {
+  const { name } = await params
+  const pokemon = await PokeAPI.pokemon(name)
+
+  return (
+    <div>
+      <h1>{pokemon.name}</h1>
+      {/* ... */}
+    </div>
+  )
+}
+```
+
+### Avec cache
+
+```tsx
+import { unstable_cache } from "next/cache"
+import { PokeAPI } from "@workspace/pokeapi"
+
+const getCachedPokemon = unstable_cache(
+  async (name: string) => PokeAPI.pokemon(name),
+  ["pokemon"],
+  { revalidate: 3600 } // Cache 1h
+)
+
+const pokemon = await getCachedPokemon("pikachu")
+```
+
+## Tests
+
+Le package inclut des tests avec Vitest :
+
+```bash
+pnpm --filter @workspace/pokeapi test
+```
+
+## Bonnes pratiques
+
+1. **Utilisez la pagination** pour éviter de charger trop de données
+2. **Gérez les erreurs** avec try/catch
+3. **Cachez les réponses** dans Next.js avec `unstable_cache`
+4. **Préférez les IDs** quand possible (plus performant)

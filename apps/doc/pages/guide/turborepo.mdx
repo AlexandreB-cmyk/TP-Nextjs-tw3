@@ -1,0 +1,152 @@
+# Turborepo
+
+Turborepo est un système de build haute performance pour les monorepos JavaScript/TypeScript.
+
+## Pourquoi Turborepo ?
+
+### Problèmes résolus
+
+Dans un monorepo traditionnel :
+- Rebuilder tout à chaque changement est lent
+- Les dépendances entre packages doivent être gérées manuellement
+- Le cache local n'existe pas
+
+### Solutions apportées
+
+Turborepo résout ces problèmes grâce à :
+
+1. **Cache intelligent** - Ne rebuild que ce qui a changé
+2. **Exécution parallèle** - Maximise l'utilisation du CPU
+3. **Graphe de dépendances** - Comprend les relations entre packages
+4. **Cache distant** - Partage le cache entre machines (optionnel)
+
+## Configuration (`turbo.json`)
+
+Voici la configuration utilisée dans ce projet :
+
+```json
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    }
+  }
+}
+```
+
+### Explication des tâches
+
+#### `build`
+
+```json
+"build": {
+  "dependsOn": ["^build"],
+  "inputs": ["$TURBO_DEFAULT$", ".env*"],
+  "outputs": [".next/**", "!.next/cache/**"]
+}
+```
+
+- **`dependsOn: ["^build"]`** - Build les dépendances d'abord (le `^` indique les dépendances)
+- **`inputs`** - Fichiers qui déclenchent un rebuild si modifiés
+- **`outputs`** - Fichiers générés à mettre en cache
+
+#### `lint`
+
+```json
+"lint": {
+  "dependsOn": ["^lint"]
+}
+```
+
+- Lint les dépendances avant de linter le package courant
+
+#### `dev`
+
+```json
+"dev": {
+  "cache": false,
+  "persistent": true
+}
+```
+
+- **`cache: false`** - Pas de cache pour le développement
+- **`persistent: true`** - La tâche tourne en continu
+
+## Commandes courantes
+
+### Lancer toutes les tâches
+
+```bash
+# Development
+pnpm dev
+
+# Build
+pnpm build
+
+# Lint
+pnpm lint
+```
+
+### Filtrer par package
+
+```bash
+# Builder uniquement l'app web
+pnpm build --filter=web
+
+# Builder un package et ses dépendances
+pnpm build --filter=web...
+
+# Builder tout sauf la documentation
+pnpm build --filter='!doc'
+```
+
+### Voir le graphe de dépendances
+
+```bash
+pnpm turbo build --graph
+```
+
+Cette commande génère un fichier `.png` montrant le graphe de dépendances.
+
+## Cache
+
+### Cache local
+
+Par défaut, Turborepo stocke le cache dans `node_modules/.cache/turbo`.
+
+### Vérifier l'état du cache
+
+```bash
+pnpm turbo build --dry-run
+```
+
+Affiche ce qui serait exécuté et ce qui est en cache.
+
+### Nettoyer le cache
+
+```bash
+rm -rf node_modules/.cache/turbo
+```
+
+## Bonnes pratiques
+
+1. **Définir les `outputs`** - Permet un cache efficace
+2. **Utiliser `dependsOn`** - Assure l'ordre correct de build
+3. **Éviter le cache pour `dev`** - Le développement doit toujours être frais
+4. **Granularité des packages** - Des packages plus petits = meilleur parallélisme
+
+## Ressources
+
+- [Documentation officielle Turborepo](https://turbo.build/repo/docs)
+- [Guides Turborepo](https://turbo.build/repo/docs/guides)
