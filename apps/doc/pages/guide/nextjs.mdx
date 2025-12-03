@@ -1,0 +1,184 @@
+# Next.js App Router
+
+Ce projet utilise le nouveau **App Router** de Next.js 15, introduit dans Next.js 13.
+
+## Concepts clés
+
+### Server Components vs Client Components
+
+Par défaut, tous les composants dans le App Router sont des **Server Components**.
+
+#### Server Components (par défaut)
+
+```tsx
+// app/page.tsx - C'est un Server Component
+export default function Page() {
+  // Ce code s'exécute UNIQUEMENT côté serveur
+  return <div>Hello World</div>
+}
+```
+
+**Avantages :**
+- Accès direct aux données (base de données, fichiers)
+- Bundle JavaScript plus léger
+- Meilleur SEO
+- Streaming natif
+
+#### Client Components
+
+```tsx
+'use client'
+
+// Ce composant s'exécute côté client
+export default function Counter() {
+  const [count, setCount] = useState(0)
+  return <button onClick={() => setCount(c => c + 1)}>{count}</button>
+}
+```
+
+**Quand utiliser :**
+- État interactif (`useState`, `useReducer`)
+- Effets (`useEffect`)
+- Événements navigateur (`onClick`, `onChange`)
+- APIs navigateur (`localStorage`, `window`)
+
+## Structure des fichiers
+
+```
+app/
+├── layout.tsx      # Layout racine
+├── page.tsx        # Page d'accueil (/)
+├── error.tsx       # Gestion d'erreurs
+├── not-found.tsx   # Page 404
+├── loading.tsx     # UI de chargement
+├── pokemon/
+│   ├── page.tsx    # /pokemon
+│   └── [name]/
+│       └── page.tsx # /pokemon/:name
+```
+
+### Fichiers spéciaux
+
+| Fichier | Description |
+|---------|-------------|
+| `page.tsx` | Définit une route accessible |
+| `layout.tsx` | UI partagée pour un segment et ses enfants |
+| `loading.tsx` | UI de chargement pendant le fetch |
+| `error.tsx` | Gestion d'erreurs pour un segment |
+| `not-found.tsx` | Page 404 personnalisée |
+
+## Routage dynamique
+
+### Paramètres de route
+
+```
+app/pokemon/[name]/page.tsx
+```
+
+```tsx
+export default async function PokemonPage({ 
+  params 
+}: { 
+  params: Promise<{ name: string }> 
+}) {
+  const { name } = await params
+  return <div>Pokémon: {name}</div>
+}
+```
+
+### Routes groupées
+
+```
+app/(marketing)/about/page.tsx  # /about
+app/(shop)/products/page.tsx    # /products
+```
+
+Les parenthèses créent des groupes sans affecter l'URL.
+
+## Data Fetching
+
+### Fetch côté serveur
+
+```tsx
+// app/pokemon/page.tsx
+async function getData() {
+  const res = await fetch('https://pokeapi.co/api/v2/pokemon')
+  return res.json()
+}
+
+export default async function Page() {
+  const data = await getData()
+  return <div>{/* afficher les données */}</div>
+}
+```
+
+### Cache et revalidation
+
+```tsx
+// Données mises en cache
+fetch('https://...', { cache: 'force-cache' })
+
+// Revalidation toutes les heures
+fetch('https://...', { next: { revalidate: 3600 } })
+
+// Pas de cache
+fetch('https://...', { cache: 'no-store' })
+```
+
+## Métadonnées SEO
+
+### Métadonnées statiques
+
+```tsx
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'Accueil',
+  description: 'Page d\'accueil du site',
+}
+```
+
+### Métadonnées dynamiques
+
+```tsx
+export async function generateMetadata({ 
+  params 
+}: { 
+  params: Promise<{ name: string }> 
+}): Promise<Metadata> {
+  const { name } = await params
+  return {
+    title: `Pokémon ${name}`,
+  }
+}
+```
+
+## Dans ce projet
+
+### Layout principal (`apps/web/app/layout.tsx`)
+
+Le layout racine définit :
+- Les polices (Geist)
+- Le thème (clair/sombre)
+- La navigation
+- Le footer
+
+### Page d'accueil (`apps/web/app/page.tsx`)
+
+Composants utilisés :
+- `ProjectStructure` - Visualisation de l'arborescence
+- `MonorepoAdvantages` - Avantages du monorepo
+- `TurboJsonExplanation` - Explication de Turborepo
+
+### Pages Pokémon (`apps/web/app/pokemon/`)
+
+- Liste infinie de Pokémon
+- Filtres et recherche
+- Pages de détail dynamiques
+- Comparaison de Pokémon
+
+## Ressources
+
+- [Documentation Next.js App Router](https://nextjs.org/docs/app)
+- [Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+- [Data Fetching](https://nextjs.org/docs/app/building-your-application/data-fetching)

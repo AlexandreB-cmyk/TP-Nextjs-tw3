@@ -1,0 +1,112 @@
+# Architecture du projet
+
+Ce projet utilise une architecture **monorepo** moderne avec Turborepo.
+
+## Structure des dossiers
+
+```
+TP-Nextjs-tw3/
+├── apps/
+│   ├── web/              # Application Next.js principale
+│   └── doc/              # Documentation Nextra
+├── packages/
+│   ├── ui/               # Composants UI partagés (shadcn/ui)
+│   ├── form/             # Composants de formulaire
+│   ├── pokeapi/          # Client API Pokémon
+│   ├── eslint-config/    # Configuration ESLint partagée
+│   └── typescript-config/ # Configuration TypeScript partagée
+├── package.json          # Configuration racine
+├── pnpm-workspace.yaml   # Configuration du workspace pnpm
+└── turbo.json            # Configuration Turborepo
+```
+
+## Applications (`apps/`)
+
+### `apps/web`
+
+L'application principale construite avec Next.js 15. Elle utilise :
+
+- **Next.js App Router** pour le routage
+- **Tailwind CSS v4** pour le styling
+- **shadcn/ui** pour les composants
+- L'API Pokémon pour les données
+
+### `apps/doc`
+
+La documentation du projet (ce que vous lisez actuellement), construite avec :
+
+- **Nextra** pour la documentation
+- **MDX** pour le contenu
+
+## Packages (`packages/`)
+
+### `@workspace/ui`
+
+Bibliothèque de composants UI partagés basée sur shadcn/ui.
+
+**Composants disponibles :**
+- `Button` - Boutons avec variantes
+- `Card` - Cartes de contenu
+- `Input` - Champs de saisie
+- `Select` - Menus déroulants
+- `Badge` - Badges/étiquettes
+- `Skeleton` - Placeholders de chargement
+- `Table` - Tableaux de données
+- `Chart` - Graphiques (Recharts)
+- `NavigationMenu` - Menu de navigation
+
+### `@workspace/form`
+
+Composants de formulaire réutilisables avec validation Zod.
+
+**Composants disponibles :**
+- `Form` - Conteneur de formulaire
+- `FormField` - Champ de formulaire
+- `FormLabel` - Label de champ
+- `FormControl` - Contrôle de formulaire
+- `FormDescription` - Description d'aide
+- `FormMessage` - Message d'erreur
+- `FormSubmitButton` - Bouton de soumission
+
+### `@workspace/pokeapi`
+
+Client API pour communiquer avec l'API Pokémon.
+
+**Fonctionnalités :**
+- Récupération de la liste des Pokémon
+- Détails d'un Pokémon
+- Liste des capacités
+- Liste des baies
+- Liste des mouvements
+
+### `@workspace/eslint-config`
+
+Configuration ESLint partagée pour tous les packages.
+
+### `@workspace/typescript-config`
+
+Configurations TypeScript de base pour différents types de projets.
+
+## Fichiers de configuration
+
+### `pnpm-workspace.yaml`
+
+Définit les packages du monorepo :
+
+```yaml
+packages:
+  - "apps/*"
+  - "packages/*"
+```
+
+### `turbo.json`
+
+Configure les pipelines de build Turborepo. Voir [Turborepo](/guide/turborepo) pour plus de détails.
+
+## Avantages de cette architecture
+
+1. **Partage de code** - Les packages peuvent être réutilisés entre applications
+2. **Cohérence** - Configuration centralisée (ESLint, TypeScript)
+3. **Performance** - Turborepo optimise les builds
+4. **Isolation** - Chaque package a ses propres dépendances
+5. **Scalabilité** - Facile d'ajouter de nouveaux packages/apps
