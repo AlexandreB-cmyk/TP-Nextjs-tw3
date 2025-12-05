@@ -140,6 +140,20 @@ export function NavigationMain() {
                 >
                   Liste des utilisateurs
                 </Link>
+                <Link
+                  href="/connexion"
+                  className="block py-1.5 text-sm hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Connexion
+                </Link>
+                <Link
+                  href="/inscription"
+                  className="block py-1.5 text-sm hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Inscription
+                </Link>
               </div>
             </div>
           </nav>
@@ -208,8 +222,8 @@ export function NavigationMain() {
               <NavigationMenuItem>
                 <NavigationMenuTrigger>Utilisateurs</NavigationMenuTrigger>
                 <NavigationMenuContent>
-                  <ul className="grid gap-3 p-4 md:w-[400px]">
-                    <li>
+                  <ul className="grid gap-3 p-4 md:w-[400px] lg:w-[500px] lg:grid-cols-[.75fr_1fr]">
+                    <li className="row-span-3">
                       <NavigationMenuLink asChild>
                         <Link
                           className="flex h-full w-full select-none flex-col justify-end rounded-md bg-gradient-to-b from-muted/50 to-muted p-6 no-underline outline-none focus:shadow-md"
@@ -219,11 +233,17 @@ export function NavigationMain() {
                             Liste des utilisateurs
                           </div>
                           <p className="text-sm leading-tight text-muted-foreground">
-                            Consultez et gérez les utilisateurs enregistrés dans l'application.
+                            Consultez et gérez les utilisateurs enregistrés dans l&apos;application.
                           </p>
                         </Link>
                       </NavigationMenuLink>
                     </li>
+                    <ListItem href="/connexion" title="Connexion">
+                      Connectez-vous à votre compte utilisateur.
+                    </ListItem>
+                    <ListItem href="/inscription" title="Inscription">
+                      Créez un nouveau compte utilisateur.
+                    </ListItem>
                   </ul>
                 </NavigationMenuContent>
               </NavigationMenuItem>

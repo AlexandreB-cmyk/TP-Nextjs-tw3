@@ -36,3 +36,6 @@ export type {
   CreateUserInput,
   UpdateUserInput,
 } from './user.js';
+
+// Export de ObjectId pour la validation des IDs
+export { ObjectId } from 'mongodb';
