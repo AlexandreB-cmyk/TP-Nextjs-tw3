@@ -13,6 +13,7 @@
 
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Title } from "@/components/Title";
 import { Text } from "@/components/Text";
 import { Button } from "@workspace/ui/components/button";
@@ -31,7 +32,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { Users, Eye } from "lucide-react";
+import { Users, Eye, LogOut, UserPlus } from "lucide-react";
+import { listUsers } from "@workspace/database";
+import { getSession, deleteSession } from "@/lib/auth";
 
 /**
  * Métadonnées SEO pour la page Liste des Utilisateurs
@@ -47,55 +50,42 @@ export const metadata: Metadata = {
 };
 
 /**
- * Interface pour représenter un utilisateur dans la liste
- * Note : Correspond au modèle User du package @workspace/database
+ * Server Action pour la déconnexion
  */
-interface UserListItem {
-  _id: string;
-  email: string;
-  name: string;
-  createdAt: Date;
-  updatedAt: Date;
+async function logoutAction() {
+  "use server";
+  await deleteSession();
+  redirect("/connexion");
 }
-
-/**
- * Données de démonstration pour les utilisateurs
- * Note : En production, ces données viendraient de MongoDB via le package @workspace/database
- * 
- * Exemple avec MongoDB :
- * import { listUsers } from "@workspace/database";
- * const users = await listUsers();
- */
-const demoUsers: UserListItem[] = [
-  {
-    _id: "1",
-    email: "jean.dupont@example.com",
-    name: "Jean Dupont",
-    createdAt: new Date("2024-01-15"),
-    updatedAt: new Date("2024-01-15"),
-  },
-  {
-    _id: "2",
-    email: "marie.martin@example.com",
-    name: "Marie Martin",
-    createdAt: new Date("2024-02-20"),
-    updatedAt: new Date("2024-03-10"),
-  },
-  {
-    _id: "3",
-    email: "pierre.durand@example.com",
-    name: "Pierre Durand",
-    createdAt: new Date("2024-03-05"),
-    updatedAt: new Date("2024-03-05"),
-  },
-];
 
 /**
  * Composant de page pour la liste des utilisateurs
  */
 export default async function UtilisateursPage() {
-  // En production : const users = await listUsers();
-  const users = demoUsers;
+  // Récupérer la session de l'utilisateur connecté
+  const session = await getSession();
+  
+  // Récupérer les utilisateurs depuis MongoDB
+  let users: Array<{
+    _id: string;
+    email: string;
+    name: string;
+    createdAt: Date;
+    updatedAt: Date;
+  }> = [];
+  
+  try {
+    const dbUsers = await listUsers();
+    users = dbUsers.map((user) => ({
+      _id: user._id.toString(),
+      email: user.email,
+      name: user.name,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    }));
+  } catch (error) {
+    console.error("Erreur lors de la récupération des utilisateurs:", error);
+  }
 
   return (
     <div className="container mx-auto py-6 sm:py-8 md:py-10 px-4 space-y-6 sm:space-y-8">
@@ -106,18 +96,43 @@ export default async function UtilisateursPage() {
           <Title level="h1">Liste des Utilisateurs</Title>
         </div>
         <Text size="lg" className="max-w-2xl">
-          Consultez et gérez les utilisateurs enregistrés dans l'application.
+          Consultez et gérez les utilisateurs enregistrés dans l&apos;application.
           Cliquez sur un utilisateur pour voir ses détails.
         </Text>
+        
+        {/* Affichage de l'utilisateur connecté et bouton de déconnexion */}
+        {session && (
+          <div className="flex items-center gap-4 mt-4">
+            <Text className="text-muted-foreground">
+              Connecté en tant que <span className="font-medium text-foreground">{session.name}</span>
+            </Text>
+            <form action={logoutAction}>
+              <Button variant="outline" size="sm" type="submit">
+                <LogOut className="mr-2 h-4 w-4" />
+                Déconnexion
+              </Button>
+            </form>
+          </div>
+        )}
       </div>
 
       {/* Card contenant la table des utilisateurs */}
       <Card>
         <CardHeader>
-          <CardTitle>Utilisateurs ({users.length})</CardTitle>
-          <CardDescription>
-            Liste de tous les utilisateurs avec leurs informations de base.
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Utilisateurs ({users.length})</CardTitle>
+              <CardDescription>
+                Liste de tous les utilisateurs avec leurs informations de base.
+              </CardDescription>
+            </div>
+            <Button asChild>
+              <Link href="/inscription">
+                <UserPlus className="mr-2 h-4 w-4" />
+                Nouvel utilisateur
+              </Link>
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           {users.length > 0 ? (
@@ -157,7 +172,7 @@ export default async function UtilisateursPage() {
           ) : (
             <div className="text-center py-12">
               <Text className="text-muted-foreground">
-                Aucun utilisateur trouvé.
+                Aucun utilisateur trouvé. Créez votre premier utilisateur !
               </Text>
             </div>
           )}
