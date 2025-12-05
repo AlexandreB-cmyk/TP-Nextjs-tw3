@@ -31,7 +31,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@workspace/ui/components/card";
-import { Users, UserPlus, Eye } from "lucide-react";
+import { Users, Eye } from "lucide-react";
 
 /**
  * Métadonnées SEO pour la page Liste des Utilisateurs
@@ -109,12 +109,6 @@ export default async function UtilisateursPage() {
           Consultez et gérez les utilisateurs enregistrés dans l'application.
           Cliquez sur un utilisateur pour voir ses détails.
         </Text>
-        <Button asChild>
-          <Link href="/utilisateur/nouveau">
-            <UserPlus className="mr-2 h-4 w-4" />
-            Nouvel utilisateur
-          </Link>
-        </Button>
       </div>
 
       {/* Card contenant la table des utilisateurs */}
