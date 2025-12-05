@@ -46,6 +46,16 @@ export type UpdateUserInput = Partial<Omit<User, '_id' | 'createdAt' | 'updatedA
 const COLLECTION_NAME = 'users';
 
 /**
+ * Normalise un email (minuscules + trim)
+ * 
+ * @param email - L'email à normaliser
+ * @returns L'email normalisé
+ */
+function normalizeEmail(email: string): string {
+  return email.toLowerCase().trim();
+}
+
+/**
  * Récupère la collection des utilisateurs
  */
 async function getUsersCollection() {
@@ -80,6 +90,7 @@ export async function createUser(input: CreateUserInput): Promise<WithId<User>> 
   
   const user: User = {
     ...input,
+    email: normalizeEmail(input.email),
     createdAt: now,
     updatedAt: now,
   };
@@ -92,12 +103,12 @@ export async function createUser(input: CreateUserInput): Promise<WithId<User>> 
  * Trouve un utilisateur par son ID
  * 
  * @param id - L'ID de l'utilisateur (string ou ObjectId)
- * @returns L'utilisateur ou null s'il n'existe pas
+ * @returns L'utilisateur (sans mot de passe) ou null s'il n'existe pas
  */
 export async function findUserById(id: string | ObjectId): Promise<WithId<User> | null> {
   const collection = await getUsersCollection();
   const objectId = typeof id === 'string' ? new ObjectId(id) : id;
-  return collection.findOne({ _id: objectId });
+  return collection.findOne({ _id: objectId }, { projection: { password: 0 } });
 }
 
 /**
@@ -110,7 +121,7 @@ export async function findUserById(id: string | ObjectId): Promise<WithId<User> 
  */
 export async function findUserByEmail(email: string): Promise<WithId<User> | null> {
   const collection = await getUsersCollection();
-  return collection.findOne({ email: email.toLowerCase() });
+  return collection.findOne({ email: normalizeEmail(email) });
 }
 
 /**

@@ -30,8 +30,14 @@ let clientPromise: Promise<MongoClient> | null = null;
 
 /**
  * Options de connexion MongoDB
+ * Configurées pour la production avec des timeouts appropriés
  */
-const options = {};
+const options = {
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  serverSelectionTimeoutMS: 5000,
+  connectTimeoutMS: 10000,
+};
 
 /**
  * Récupère ou crée une connexion MongoDB
