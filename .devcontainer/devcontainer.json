@@ -42,7 +42,7 @@
     }
   },
   // Install dependencies on container creation
-  "postCreateCommand": "corepack enable && pnpm install && pnpm --filter=./packages/* build",
+  "postCreateCommand": "corepack enable && pnpm install && pnpm --filter='./packages/*' build",
   // Environment variables
   "remoteEnv": {
     "MONGODB_URI": "mongodb://mongodb:27017",

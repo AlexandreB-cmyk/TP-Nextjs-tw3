@@ -10,7 +10,7 @@
       "name": "Install Dependencies"
     },
     {
-      "command": "pnpm --filter=./packages/* build",
+      "command": "pnpm --filter='./packages/*' build",
       "name": "Build Packages"
     },
     {
