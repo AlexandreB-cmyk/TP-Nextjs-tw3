@@ -4,8 +4,6 @@
   "private": true,
   "scripts": {
     "build": "turbo build",
-    "dev": "run-p dev:db dev:app",
-    "dev:db": "docker compose up",
     "dev:app": "turbo dev",
     "lint": "turbo lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\""
@@ -13,7 +11,6 @@
   "devDependencies": {
     "@workspace/eslint-config": "workspace:*",
     "@workspace/typescript-config": "workspace:*",
-    "npm-run-all2": "^8.0.4",
     "prettier": "^3.6.2",
     "turbo": "^2.5.5",
     "typescript": "5.7.3"

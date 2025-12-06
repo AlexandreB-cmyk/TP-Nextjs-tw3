@@ -12,7 +12,7 @@
  */
 
 import { ObjectId, WithId } from 'mongodb';
-import { getCollection } from './mongodb-client.js';
+import { getCollection } from './mongodb-client.ts';
 
 /**
  * Interface représentant un utilisateur dans la base de données
@@ -87,7 +87,7 @@ export async function initializeUsersCollection(): Promise<void> {
 export async function createUser(input: CreateUserInput): Promise<WithId<User>> {
   const collection = await getUsersCollection();
   const now = new Date();
-  
+
   const user: User = {
     ...input,
     email: normalizeEmail(input.email),
@@ -157,11 +157,11 @@ export async function updateUser(
 
   const result = await collection.findOneAndUpdate(
     { _id: objectId },
-    { 
-      $set: { 
-        ...input, 
-        updatedAt: new Date() 
-      } 
+    {
+      $set: {
+        ...input,
+        updatedAt: new Date()
+      }
     },
     { returnDocument: 'after' }
   );

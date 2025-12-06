@@ -1,6 +1,8 @@
 {
   "extends": "@workspace/typescript-config/base.json",
   "compilerOptions": {
+    "allowImportingTsExtensions": true,
+    "noEmit": true, // Requis lorsque allowImportingTsExtensions est activé
     "outDir": "./dist",
     "declaration": true
   },
