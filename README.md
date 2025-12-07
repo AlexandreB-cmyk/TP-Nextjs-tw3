@@ -50,7 +50,14 @@ pnpm dev:app
 
 ## 📦 Base de données MongoDB
 
-Le projet utilise MongoDB pour la persistance des données. La configuration Docker Compose lance automatiquement une instance MongoDB accessible sur `mongodb://localhost:27017`.
+Le projet utilise **MongoDB 6.12.0** pour la persistance des données. La configuration Docker Compose lance automatiquement une instance MongoDB accessible sur `mongodb://localhost:27017`.
+
+Le package `@workspace/database` fournit un client MongoDB singleton et des modèles pour gérer les utilisateurs et l'authentification. Il inclut :
+
+- **Client MongoDB** avec pattern singleton pour une connexion optimisée
+- **Modèle User** avec opérations CRUD complètes
+- **Index optimisés** pour les recherches par email
+- **Support TypeScript** complet avec types exportés
 
 Pour plus de détails sur l'utilisation de la base de données, consultez le [README du package database](./packages/database/README.md).
 
@@ -68,6 +75,61 @@ docker compose logs -f mongodb
 
 # Accéder au shell MongoDB
 docker exec -it tp-nextjs-mongodb mongosh
+```
+
+## 🔐 Authentification
+
+Le projet inclut un système d'authentification complet avec :
+
+- **Inscription et connexion** via email/mot de passe
+- **Sessions JWT** sécurisées avec la librairie `jose`
+- **Hachage de mots de passe** avec `bcryptjs` (10 rounds de salt)
+- **Cookies HTTP-only** pour stocker les sessions
+- **Validation** des entrées utilisateur
+
+### Configuration
+
+Créez un fichier `.env.local` à la racine du projet web :
+
+```env
+# MongoDB
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB_NAME=tp-nextjs
+
+# JWT Secret (changez en production !)
+JWT_SECRET=votre-secret-jwt-tres-securise
+```
+
+### Pages disponibles
+
+- `/inscription` - Créer un nouveau compte
+- `/connexion` - Se connecter avec un compte existant
+- `/utilisateur` - Liste des utilisateurs (nécessite d'être connecté)
+- `/utilisateur/[id]` - Détails d'un utilisateur
+
+### Utilisation de l'authentification
+
+```typescript
+import { createSession, getSession, deleteSession, hashPassword, verifyPassword } from '@/lib/auth';
+import { createUser, findUserByEmail } from '@workspace/database';
+
+// Inscription
+const hashedPassword = await hashPassword(password);
+const user = await createUser({ email, name, password: hashedPassword });
+await createSession(user._id.toString(), user.email, user.name);
+
+// Connexion
+const user = await findUserByEmail(email);
+const isValid = await verifyPassword(password, user.password);
+if (isValid) {
+  await createSession(user._id.toString(), user.email, user.name);
+}
+
+// Récupérer la session
+const session = await getSession();
+
+// Déconnexion
+await deleteSession();
 ```
 
 ## Utilisation

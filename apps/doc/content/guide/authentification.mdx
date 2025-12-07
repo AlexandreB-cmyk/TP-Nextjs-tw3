@@ -1,13 +1,33 @@
 # Authentification
 
-Ce guide présente l'espace authentification du projet web, incluant la gestion des utilisateurs.
+Ce guide présente le système d'authentification complet du projet, incluant l'inscription, la connexion, la gestion des sessions et la protection des routes.
 
 ## Présentation
 
-L'espace authentification permet de gérer les utilisateurs de l'application. Il comprend :
+Le projet utilise un système d'authentification moderne et sécurisé basé sur :
 
-- Une **page liste des utilisateurs** (`/utilisateur`) pour consulter tous les utilisateurs
-- Une **page détail utilisateur** (`/utilisateur/[id]`) pour voir les informations d'un utilisateur spécifique
+- **JWT (JSON Web Tokens)** pour les sessions stateless avec la librairie `jose`
+- **Bcrypt** pour le hachage sécurisé des mots de passe (10 rounds)
+- **Cookies HTTP-only** pour stocker les sessions de manière sécurisée
+- **Server Actions** Next.js 15 pour la soumission des formulaires
+- **MongoDB** via `@workspace/database` pour la persistance des utilisateurs
+
+## Architecture
+
+### Composants principaux
+
+1. **Librairie d'authentification** (`apps/web/lib/auth.ts`)
+   - Gestion des sessions JWT
+   - Hachage et vérification des mots de passe
+   - Gestion des cookies
+
+2. **Pages d'authentification**
+   - `/inscription` - Création de compte
+   - `/connexion` - Connexion utilisateur
+
+3. **Pages protégées**
+   - `/utilisateur` - Liste des utilisateurs
+   - `/utilisateur/[id]` - Détail d'un utilisateur
 
 ## Structure des dossiers
 
@@ -52,19 +72,132 @@ export default async function UtilisateursPage() {
 }
 ```
 
-### Page détail utilisateur (`/utilisateur/[id]`)
+### Gestion des sessions JWT
 
-Cette page affiche les informations détaillées d'un utilisateur spécifique.
+```tsx
+import { createSession, getSession, deleteSession } from "@/lib/auth";
+
+// Créer une session (après inscription ou connexion)
+await createSession(userId, email, name);
+
+// Récupérer la session courante
+const session = await getSession();
+// session = { userId, email, name, expiresAt } ou null
+
+// Supprimer la session (déconnexion)
+await deleteSession();
+```
+
+**Détails techniques :**
+- Les JWT sont signés avec HS256
+- Durée de validité : 7 jours
+- Cookie HTTP-only, Secure en production, SameSite=lax
+- Le cookie est nommé `session`
+
+### Gestion des mots de passe
+
+```tsx
+import { hashPassword, verifyPassword } from "@/lib/auth";
+
+// Hasher un mot de passe (avant stockage)
+const hashedPassword = await hashPassword("mon-mot-de-passe");
+// Utilise bcrypt avec 10 rounds de salt
+
+// Vérifier un mot de passe (lors de la connexion)
+const isValid = await verifyPassword("mon-mot-de-passe", hashedPassword);
+// Retourne true si le mot de passe correspond
+```
+
+**Bonnes pratiques :**
+- Ne jamais stocker de mot de passe en clair
+- Toujours hasher avant d'appeler `createUser()`
+- Utiliser `verifyPassword()` pour comparer les mots de passe
+
+## Pages d'authentification
+
+### Page d'inscription (`/inscription`)
+
+Permet aux utilisateurs de créer un nouveau compte.
 
 **Fonctionnalités :**
-- Affichage du nom et email
-- Dates de création et de mise à jour
-- Actions : modifier et supprimer (à implémenter)
+- Validation des champs (nom, email, mot de passe)
+- Vérification de la longueur du mot de passe (minimum 6 caractères)
+- Confirmation du mot de passe
+- Vérification de l'unicité de l'email
+- Hachage automatique du mot de passe
+- Création de session automatique après inscription
 
-**Concepts Next.js utilisés :**
-- Routes dynamiques avec `[id]`
-- `generateMetadata` pour le SEO dynamique
-- `notFound()` pour les utilisateurs inexistants
+**Exemple de code :**
+
+```tsx
+// apps/web/app/inscription/page.tsx
+async function registerAction(formData: FormData) {
+  "use server";
+  
+  const name = formData.get("name") as string;
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  
+  // Vérifier si l'email existe déjà
+  const existingUser = await findUserByEmail(email);
+  if (existingUser) {
+    redirect("/inscription?error=Email%20d%C3%A9j%C3%A0%20utilis%C3%A9");
+  }
+  
+  // Hasher le mot de passe
+  const hashedPassword = await hashPassword(password);
+  
+  // Créer l'utilisateur
+  const user = await createUser({ name, email, password: hashedPassword });
+  
+  // Créer la session
+  await createSession(user._id.toString(), user.email, user.name);
+  
+  // Rediriger
+  redirect("/utilisateur");
+}
+```
+
+### Page de connexion (`/connexion`)
+
+Permet aux utilisateurs de se connecter avec leur compte existant.
+
+**Fonctionnalités :**
+- Validation des champs (email, mot de passe)
+- Recherche de l'utilisateur par email
+- Vérification du mot de passe avec bcrypt
+- Création de session en cas de succès
+- Messages d'erreur explicites
+
+**Exemple de code :**
+
+```tsx
+// apps/web/app/connexion/page.tsx
+async function loginAction(formData: FormData) {
+  "use server";
+  
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  
+  // Trouver l'utilisateur
+  const user = await findUserByEmail(email);
+  if (!user || !user.password) {
+    redirect("/connexion?error=Identifiants%20invalides");
+  }
+  
+  // Vérifier le mot de passe
+  const isValid = await verifyPassword(password, user.password);
+  if (!isValid) {
+    redirect("/connexion?error=Identifiants%20invalides");
+  }
+  
+  // Créer la session
+  await createSession(user._id.toString(), user.email, user.name);
+  
+  // Rediriger
+  redirect("/utilisateur");
+}
+```
 
 ## Package @workspace/database
 
@@ -96,33 +229,192 @@ interface User {
 }
 ```
 
-## Navigation
+## Pages Utilisateurs
 
-L'espace utilisateurs est accessible depuis le menu principal de l'application :
-- Menu "Utilisateurs" dans la barre de navigation
-- Accès direct via `/utilisateur`
+### Liste des utilisateurs (`/utilisateur`)
 
-## Configuration MongoDB
+Cette page affiche la liste de tous les utilisateurs enregistrés dans l'application.
 
-Pour utiliser les fonctionnalités de base de données, configurez les variables d'environnement :
+**Fonctionnalités :**
+- Affichage sous forme de table
+- Informations : nom, email, date de création
+- Lien vers la page de détail de chaque utilisateur
+- Bouton pour créer un nouvel utilisateur
+
+**Exemple de code :**
+
+```tsx
+import { listUsers } from "@workspace/database";
+
+export default async function UtilisateursPage() {
+  const users = await listUsers();
+  
+  return (
+    <Table>
+      {users.map((user) => (
+        <TableRow key={user._id.toString()}>
+          <TableCell>{user.name}</TableCell>
+          <TableCell>{user.email}</TableCell>
+        </TableRow>
+      ))}
+    </Table>
+  );
+}
+```
+
+### Page détail utilisateur (`/utilisateur/[id]`)
+
+Cette page affiche les informations détaillées d'un utilisateur spécifique.
+
+**Fonctionnalités :**
+- Affichage du nom et email
+- Dates de création et de mise à jour
+- Actions : modifier et supprimer (à implémenter)
+
+**Concepts Next.js utilisés :**
+- Routes dynamiques avec `[id]`
+- `generateMetadata` pour le SEO dynamique
+- `notFound()` pour les utilisateurs inexistants
+
+## Protection des routes
+
+Pour protéger une route et exiger une authentification, utilisez `getSession()` :
+
+```tsx
+import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
+
+export default async function ProtectedPage() {
+  // Vérifier la session
+  const session = await getSession();
+  
+  // Rediriger si non connecté
+  if (!session) {
+    redirect("/connexion");
+  }
+  
+  // Page accessible uniquement aux utilisateurs connectés
+  return (
+    <div>
+      <h1>Bienvenue {session.name}</h1>
+      <p>Email: {session.email}</p>
+    </div>
+  );
+}
+```
+
+## Middleware (optionnel)
+
+Pour protéger plusieurs routes à la fois, créez un middleware :
+
+```tsx
+// apps/web/middleware.ts
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { getSession } from "@/lib/auth";
+
+export async function middleware(request: NextRequest) {
+  const session = await getSession();
+  
+  // Routes protégées
+  const protectedRoutes = ["/utilisateur", "/profil"];
+  const isProtectedRoute = protectedRoutes.some(route => 
+    request.nextUrl.pathname.startsWith(route)
+  );
+  
+  // Rediriger si non authentifié
+  if (isProtectedRoute && !session) {
+    return NextResponse.redirect(new URL("/connexion", request.url));
+  }
+  
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
+```
+
+## Configuration
+
+### Variables d'environnement
+
+Créez un fichier `.env.local` à la racine de l'application web (`apps/web/.env.local`) :
 
 ```env
+# Configuration MongoDB
 MONGODB_URI=mongodb://localhost:27017
 MONGODB_DB_NAME=tp-nextjs
+
+# Secret JWT (IMPORTANT : changez cette valeur en production)
+JWT_SECRET=votre-secret-jwt-tres-securise-et-aleatoire
+
+# URLs de l'application
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_DOC_URL=http://localhost:3001
 ```
 
-Démarrez MongoDB avec Docker :
+### Dépendances
+
+Le système d'authentification utilise les packages suivants :
+
+- **`jose`** (^6.0.11) : Gestion des JWT (création, vérification, signature)
+- **`bcryptjs`** (^3.0.2) : Hachage des mots de passe avec salt
+- **`mongodb`** (^6.12.0) : Base de données pour stocker les utilisateurs
+- **`@workspace/database`** : Package interne pour les opérations CRUD
+
+## Librairie d'authentification
+
+Le fichier `apps/web/lib/auth.ts` expose les fonctions suivantes :
+
+## Sécurité
+
+### Bonnes pratiques implémentées
+
+1. **Cookies HTTP-only** : les tokens JWT sont stockés dans des cookies HTTP-only, inaccessibles au JavaScript côté client
+2. **Cookies Secure** : en production, les cookies utilisent l'attribut Secure (HTTPS uniquement)
+3. **SameSite=lax** : protection contre les attaques CSRF
+4. **Hachage bcrypt** : 10 rounds de salt pour un bon équilibre sécurité/performance
+5. **Normalisation des emails** : conversion en minuscules pour éviter les doublons
+6. **Index unique** : empêche la création de comptes avec le même email
+7. **Validation des entrées** : vérification côté serveur avec Server Actions
+8. **Messages d'erreur génériques** : "Identifiants invalides" pour ne pas révéler si l'email existe
+
+### Points d'amélioration possibles
+
+1. **Rate limiting** : limiter le nombre de tentatives de connexion
+2. **Vérification d'email** : envoyer un email de confirmation à l'inscription
+3. **Récupération de mot de passe** : flux de réinitialisation par email
+4. **Authentification à deux facteurs** : ajouter une couche de sécurité supplémentaire
+5. **Sessions multiples** : permettre plusieurs sessions actives par utilisateur
+6. **Révocation de tokens** : blacklist de tokens révoqués (nécessite Redis ou équivalent)
+
+## Débogage
+
+### Vérifier la connexion MongoDB
 
 ```bash
-docker-compose up -d
+# Vérifier que MongoDB est démarré
+docker-compose ps
+
+# Voir les logs MongoDB
+docker-compose logs -f mongodb
+
+# Accéder au shell MongoDB
+docker exec -it tp-nextjs-mongodb mongosh
+
+# Dans le shell, vérifier la base de données
+use tp-nextjs
+db.users.find()
 ```
 
-## Prochaines étapes
+### Problèmes courants
 
-Pour compléter l'authentification, vous pourrez implémenter :
+**Erreur : "MongoDB non disponible"**
+- Solution : Vérifiez que Docker est démarré et lancez `docker-compose up -d`
 
-1. **Inscription** - Formulaire de création de compte
-2. **Connexion** - Authentification avec email/mot de passe
-3. **Session** - Gestion des sessions utilisateur
-4. **Protection des routes** - Middleware d'authentification
-5. **Récupération de mot de passe** - Flux de réinitialisation
+**Erreur : "Email déjà utilisé"**
+- Solution : L'email existe déjà dans la base de données. Utilisez un autre email ou supprimez l'utilisateur existant.
+
+**Erreur : "JWT malformed"**
+- Solution : Le cookie de session est corrompu. Supprimez le cookie `session` dans les DevTools du navigateur.
