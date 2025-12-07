@@ -43,6 +43,45 @@ pnpm install
 
 Cette commande installe toutes les dépendances pour tous les packages et applications du monorepo.
 
+### 3. Configurer les variables d'environnement
+
+Copiez le fichier `.env.example` pour créer votre configuration locale :
+
+```bash
+cp .env.example .env.local
+```
+
+Éditez `.env.local` et configurez les variables nécessaires :
+
+```env
+# MongoDB Configuration
+MONGODB_URI=mongodb://localhost:27017
+MONGODB_DB_NAME=tp-nextjs
+
+# JWT Secret (IMPORTANT: Change this in production!)
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+
+# Development URLs
+NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_DOC_URL=http://localhost:3001
+```
+
+### 4. Démarrer MongoDB avec Docker
+
+Le projet utilise MongoDB pour la persistance des données. Lancez MongoDB avec Docker Compose :
+
+```bash
+docker-compose up -d
+```
+
+Vérifiez que MongoDB est bien démarré :
+
+```bash
+docker-compose ps
+```
+
+Vous devriez voir le service `mongodb` en état `Up`.
+
 ## Lancement du développement
 
 ### Lancer tous les projets
@@ -91,5 +130,7 @@ pnpm --filter web build
 ## Prochaines étapes
 
 - Explorez l'[architecture du projet](/guide/architecture)
+- Découvrez le système d'[authentification](/guide/authentification)
+- Apprenez à utiliser le [package database](/packages/database)
 - Apprenez comment fonctionne [Turborepo](/guide/turborepo)
 - Découvrez le [Next.js App Router](/guide/nextjs)
