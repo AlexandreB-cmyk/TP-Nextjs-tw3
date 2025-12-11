@@ -6,6 +6,7 @@ import { findUserById, ObjectId } from "@workspace/database";
 export interface UserData {
   _id: string;
   email: string;
+  favoriteFilm: string;
   name: string;
   createdAt: Date;
   updatedAt: Date;
@@ -20,16 +21,17 @@ export async function getUserById(id: string): Promise<UserData | null> {
     if (!ObjectId.isValid(id)) {
       return null;
     }
-    
+
     const user = await findUserById(id);
-    
+
     if (!user) {
       return null;
     }
-    
+
     return {
       _id: user._id.toString(),
       email: user.email,
+      favoriteFilm: user.favoriteFilm,
       name: user.name,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,

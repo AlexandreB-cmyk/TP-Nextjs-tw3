@@ -1,9 +1,9 @@
 /**
  * Page d'Inscription
- * 
+ *
  * Permet aux utilisateurs de créer un nouveau compte.
  * Utilise les Server Actions pour la soumission du formulaire.
- * 
+ *
  * Concepts clés pour les étudiants :
  * - Server Actions pour la soumission de formulaires
  * - Validation des entrées utilisateur
@@ -42,55 +42,64 @@ export const metadata: Metadata = {
  */
 async function registerAction(formData: FormData): Promise<void> {
   "use server";
-  
+
   const name = formData.get("name") as string;
+  const favoriteFilm = formData.get("favoriteFilm") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const confirmPassword = formData.get("confirmPassword") as string;
-  
+
   // Validation des champs
-  if (!name || !email || !password || !confirmPassword) {
+  if (!name || !favoriteFilm || !email || !password || !confirmPassword) {
     redirect("/inscription?error=Tous%20les%20champs%20sont%20requis");
   }
-  
+
   if (password.length < 6) {
-    redirect("/inscription?error=Le%20mot%20de%20passe%20doit%20contenir%20au%20moins%206%20caract%C3%A8res");
+    redirect(
+      "/inscription?error=Le%20mot%20de%20passe%20doit%20contenir%20au%20moins%206%20caract%C3%A8res"
+    );
   }
-  
+
   if (password !== confirmPassword) {
-    redirect("/inscription?error=Les%20mots%20de%20passe%20ne%20correspondent%20pas");
+    redirect(
+      "/inscription?error=Les%20mots%20de%20passe%20ne%20correspondent%20pas"
+    );
   }
-  
+
   try {
     // Vérifier si l'email existe déjà
     const existingUser = await findUserByEmail(email);
-    
+
     if (existingUser) {
-      redirect("/inscription?error=Un%20compte%20existe%20d%C3%A9j%C3%A0%20avec%20cet%20email");
+      redirect(
+        "/inscription?error=Un%20compte%20existe%20d%C3%A9j%C3%A0%20avec%20cet%20email"
+      );
     }
-    
+
     // Hacher le mot de passe
     const hashedPassword = await hashPassword(password);
-    
+
     // Créer l'utilisateur
     const user = await createUser({
       name,
+      favoriteFilm,
       email,
       password: hashedPassword,
     });
-    
+
     // Créer la session
     await createSession(user._id.toString(), user.email, user.name);
-    
   } catch (error) {
     // Si c'est une erreur de redirection, la relancer
     if (error instanceof Error && error.message === "NEXT_REDIRECT") {
       throw error;
     }
     console.error("Erreur d'inscription:", error);
-    redirect("/inscription?error=Erreur%20lors%20de%20la%20cr%C3%A9ation%20du%20compte.%20V%C3%A9rifiez%20que%20MongoDB%20est%20d%C3%A9marr%C3%A9.");
+    redirect(
+      "/inscription?error=Erreur%20lors%20de%20la%20cr%C3%A9ation%20du%20compte.%20V%C3%A9rifiez%20que%20MongoDB%20est%20d%C3%A9marr%C3%A9."
+    );
   }
-  
+
   // Rediriger vers la page utilisateur
   redirect("/utilisateur");
 }
@@ -116,7 +125,9 @@ export default async function InscriptionPage({
             <Title level="h1">Inscription</Title>
           </CardTitle>
           <CardDescription>
-            <Text>Créez un compte pour accéder à l&apos;espace utilisateur</Text>
+            <Text>
+              Créez un compte pour accéder à l&apos;espace utilisateur
+            </Text>
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -138,6 +149,19 @@ export default async function InscriptionPage({
                 placeholder="Jean Dupont"
                 required
                 autoComplete="name"
+              />
+            </div>
+            <div className="space-y-2">
+              <label htmlFor="favoriteFilm" className="text-sm font-medium">
+                Film favori
+              </label>
+              <Input
+                id="favoriteFilm"
+                name="favoriteFilm"
+                type="text"
+                placeholder="Pulp Fiction"
+                required
+                autoComplete="favoriteFilm"
               />
             </div>
             <div className="space-y-2">

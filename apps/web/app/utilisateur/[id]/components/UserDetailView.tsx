@@ -7,6 +7,7 @@ import { deleteUserAction } from "../actions";
 interface UserData {
   _id: string;
   email: string;
+  favoriteFilm: string;
   name: string;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,15 @@ export function UserDetailView({ user }: UserDetailViewProps) {
         <div>
           <Text className="font-medium">Email</Text>
           <Text className="text-muted-foreground">{user.email}</Text>
+        </div>
+      </div>
+
+      {/* Date de création */}
+      <div className="flex items-start gap-4">
+        <Mail className="h-5 w-5 text-muted-foreground mt-0.5" />
+        <div>
+          <Text className="font-medium">Film favori</Text>
+          <Text className="text-muted-foreground">{user.favoriteFilm}</Text>
         </div>
       </div>
 
@@ -70,7 +80,7 @@ export function UserDetailView({ user }: UserDetailViewProps) {
             Modifier
           </Link>
         </Button>
-        
+
         <form action={deleteUserAction} className="flex-1">
           <input type="hidden" name="id" value={user._id} />
           <Button variant="destructive" type="submit" className="w-full">
